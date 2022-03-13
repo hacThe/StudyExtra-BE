@@ -4,10 +4,10 @@ const PORT = 5000;
 const route = require('./routers/index');
 const connectDB = require('./configDB');
 const morgan = require('morgan');
-//const cors = require('cors');
+const cors = require('cors');
 
 app.use(morgan('combined'));
-//app.use(cors());
+app.use(cors()); 
 
 //connect mongoDB
 connectDB();
