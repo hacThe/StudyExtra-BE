@@ -7,7 +7,7 @@ const morgan = require('morgan');
 var cors = require('cors');
 
 app.use(morgan('combined'));
-app.use(cors());
+app.use(cors()); 
 
 //connect mongoDB
 connectDB();
