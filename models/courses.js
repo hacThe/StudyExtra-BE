@@ -11,7 +11,7 @@ const CoursesSchema = new Schema ({
     price: Number,
     imgUrl: String,
     chapter: Array,
-    categogy: Array,
+    categogy: String,
     rating: Array,
     studentId: Array,
 },
