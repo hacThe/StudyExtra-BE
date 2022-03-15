@@ -5,7 +5,7 @@ const route = require('./routers/index');
 const connectDB = require('./configDB');
 const morgan = require('morgan');
 const cors = require('cors');
-
+require("dotenv").config();
 app.use(morgan('combined'));
 app.use(cors()); 
 
@@ -16,7 +16,10 @@ connectDB();
 route(app);
 
 
+console.log(process.env.JWT_SECRET);
+
+
 //app listen
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running on port ${process.env.PORT || 4000}`);
 })
