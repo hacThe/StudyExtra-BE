@@ -20,10 +20,7 @@ connectDB();
 route(app);
 
 
-console.log(process.env.JWT_SECRET);
-
-
 //app listen
-app.listen(PORT, () => {
+app.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT || 4000}`);
 })
