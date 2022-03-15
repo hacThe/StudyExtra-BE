@@ -5,6 +5,10 @@ const route = require('./routers/index');
 const connectDB = require('./configDB');
 const morgan = require('morgan');
 const cors = require('cors');
+const bp = require('body-parser');
+
+app.use(bp.json())
+app.use(bp.urlencoded({ extended: true }))
 
 app.use(morgan('combined'));
 app.use(cors()); 
