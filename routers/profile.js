@@ -3,6 +3,6 @@ const router = express.Router();
 
 const AccountController = require('../controllers/AccountController');
 
-router.post('/getYourCourses', AccountController.getYourCourses);
+router.post('/getUserCourse', AccountController.getYourCourses);
 
 module.exports = router;

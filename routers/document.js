@@ -3,6 +3,6 @@ const router = express.Router();
 
 const documentController = require('../controllers/document');
 
-router.get('/', documentController.getAllDocument);
+router.get('/getAllDocument', documentController.getAllDocument);
 
 module.exports = router;
