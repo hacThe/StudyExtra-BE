@@ -3,6 +3,7 @@ const router = express.Router();
 
 const documentController = require('../controllers/document');
 
-router.get('/getAllDocument', documentController.getAllDocument);
+router.get('/', documentController.getAllDocument);
+router.post('/', documentController.addNewDocument);
 
 module.exports = router;
