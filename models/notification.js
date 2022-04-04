@@ -1,9 +1,9 @@
 const { ObjectId } = require('mongodb');
-const mongoose = require ('mongoose')
+const mongoose = require ('mongoose');
 const Schema = mongoose.Schema;
 
 const NotificationSchema = new Schema ({
-    userID: {
+    username: {
         type: String,
         required: true,
     },
@@ -12,11 +12,12 @@ const NotificationSchema = new Schema ({
         required: true,
     },
     type: {
-        type: String,//
+        type: String,//system/user/
         required: true,
     },
     creator: String,//username người tạo thông báo
-    fileUrl: String,
+    imgUrl: String,
+    fileUrl: String
 },
     { timestamps: true }
 );
