@@ -9,6 +9,7 @@ const connectDB = require('./configDB');
 const morgan = require('morgan');
 const cors = require('cors');
 const bp = require('body-parser');
+const { ok } = require('assert');
 require("dotenv").config();
 
 
@@ -35,25 +36,40 @@ route(app);
 
 //Socket
 io.on('connection', (socket) => {
+
+    //Tham gia room
+    socket.on('room', room => {
+        socket.join(room)
+        io.to(room).emit('chat', data => {
+            console.log(data)
+        })
+    })
+
+
     console.log('user connect ' + socket.id);
     //Bắt sự kiện từ client
     //chat tổng
-    socket.on('on-chat', data => {
+    socket.on('on-chat', (data => {
         console.log(data)
         io.emit('user-chat', data)
-    })
+    }))
     //Chat riêng
     socket.on('send-to-user', data => {
         console.log(data);
         io.emit(`user-${data.nameTo}`, data)
     })
 
-    // socket.on("sendDataClient", function (data) { // Handle khi có sự kiện tên là sendDataClient từ phía client
-    //     console.log(data)
-    //     socket.emit("sendDataServer", { data });// phát sự kiện  có tên sendDataServer cùng với dữ liệu tin nhắn từ phía server
-    // })
+    //Bắt sự kiện gửi cho tất cả ngoại trừ người gửi (broadcast)
+    socket.on('online', data => {
+        socket.broadcast.emit("getOnline", data);
+    })
 
-    
+    //Khi có người connect thì sẽ gửi sự kiện đến cho mọi người
+    socket.emit("nameEvent", "world");
+
+    //Gửi mọi người
+    socket.emit('HEllo every one , im newbie')
+
     //Truyển ID socket về client
     socket.emit("me", socket.id)
 
