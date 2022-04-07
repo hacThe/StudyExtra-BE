@@ -4,8 +4,10 @@ const profilesRouter = require('./profile');
 const authRouter = require('./auth');
 const notificationRouter = require('./notification');
 const documentController = require('./document');
+const searchController = require('./search')
 
 function route(app) {
+    app.use("/api/search", searchController)
     app.use("/api/posts", postsRouter);
     app.use("/api/courses", coursesRouter);
     app.use("/api/profiles", profilesRouter);
