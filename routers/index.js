@@ -4,6 +4,7 @@ const profilesRouter = require('./profile');
 const authRouter = require('./auth');
 const notificationRouter = require('./notification');
 const documentController = require('./document');
+const examController = require('./exam');
 
 function route(app) {
     app.use("/api/posts", postsRouter);
@@ -12,6 +13,8 @@ function route(app) {
     app.use("/api/auth", authRouter);
     app.use("/api/notification", notificationRouter);
     app.use("/api/document", documentController);
+    app.use("/api/exam", examController);
+
     //app.use("/", (req, res) => res.send('hello'));
 }
 
