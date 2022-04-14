@@ -4,13 +4,10 @@ const profilesRouter = require('./profile');
 const authRouter = require('./auth');
 const notificationRouter = require('./notification');
 const documentController = require('./document');
-<<<<<<< HEAD
 const searchController = require('./search')
-=======
 const examController = require('./exam');
->>>>>>> thanh/thithu
 
-function route(app) {
+function route(app) {W
     app.use("/api/search", searchController)
     app.use("/api/posts", postsRouter);
     app.use("/api/courses", coursesRouter);
