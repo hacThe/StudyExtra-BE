@@ -1,6 +1,7 @@
 const Document = require("../models/document");
 class DocumentController {
     getAllDocument = async (req, res) => {
+        console.log("nav to get document");
         Document.find().exec()
         .then((data) => {
             res.status(200).send(
