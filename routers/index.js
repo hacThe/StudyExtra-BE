@@ -4,7 +4,11 @@ const profilesRouter = require('./profile');
 const authRouter = require('./auth');
 const notificationRouter = require('./notification');
 const documentController = require('./document');
+<<<<<<< HEAD
 const searchController = require('./search')
+=======
+const examController = require('./exam');
+>>>>>>> thanh/thithu
 
 function route(app) {
     app.use("/api/search", searchController)
@@ -14,6 +18,8 @@ function route(app) {
     app.use("/api/auth", authRouter);
     app.use("/api/notification", notificationRouter);
     app.use("/api/document", documentController);
+    app.use("/api/exam", examController);
+
     //app.use("/", (req, res) => res.send('hello'));
 }
 
