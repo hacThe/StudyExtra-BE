@@ -2,12 +2,11 @@ const Notification = require("../models/notification");
 const User =  require("../models/users");
 class NotificationController {
   getUserNotification = async (req, res) => {
-    //const username = req.body.username;
     const username = res.locals.data.username;
-    console.log("local data:", username);
     
-    Notification.find({ username: username }).sort({ createdAt: -1 }).limit(10).exec()
+    Notification.find({ username: username }).exec()
       .then((data) => {
+        console.log("data notification: ", data);
         res.status(200).send(
           JSON.stringify({
             data: data
@@ -18,6 +17,8 @@ class NotificationController {
         res.status(404).send(error);
       })
   }
+
+
   createNotification = async (req, res) => {
     
     const newNotification = new Notification({
