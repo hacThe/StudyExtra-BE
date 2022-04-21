@@ -7,6 +7,16 @@ class AuthController {
   register = async (req, res) => {
     const username = req.body.username;
     const password = bcrypt.hashSync(req.body.password, saltRounds);
+    const name = req.body.name;
+    const phone = req.body.phone;
+    const role = req.body.role;
+    const mail = req.body.mail;
+    const avatar = req.body.avatar;
+    const courseID = req.body.courseID;    
+    const gem = req.body.gem;
+    const birthday = req.body.birthday;   
+    const pointID = req.body.pointID;    
+    const gender = req.body.gender;
     console.log({ username, password });
 
     User.findOne({ username: username })
@@ -22,7 +32,16 @@ class AuthController {
           const newUser = new User({
             username,
             password,
-            role: "user"
+            name,
+            phone,
+            role,
+            mail,
+            avatar,
+            courseID,
+            gem,
+            birthday,
+            pointID,
+            gender
           });
 
           newUser.save().then((data) => {

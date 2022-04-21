@@ -19,6 +19,7 @@ const UserSchema = new Schema ({
     gem: Number,
     birthday: Date,
     pointID: Array,
+    gender: String
 },
     { timestamps: true }
 );

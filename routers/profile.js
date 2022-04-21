@@ -6,5 +6,6 @@ const AccountController = require('../controllers/AccountController');
 
 
 router.get('/getUserCourses', AuthMiddleware, AccountController.getUserCourses);
+router.post('/upLoadAvatar',AuthMiddleware, AccountController.uploadAvatar);
 
 module.exports = router;
