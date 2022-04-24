@@ -6,6 +6,8 @@ const DocumentSchema = new Schema ({
     name: String,
     typeID: Array,
     views: Number,
+    link: String,
+    isHidden: Boolean,
 },
     { timestamps: true }
 );

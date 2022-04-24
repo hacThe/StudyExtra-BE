@@ -21,7 +21,9 @@ class DocumentController {
             documentID: req.body.documentID,
             name: req.body.name,
             typeID: req.body.typeID,
-            views: req.body.views
+            views: req.body.views,
+            link: req.body.link,
+            isHidden: false,
         })
         
 

@@ -10,6 +10,7 @@ const PostsSchema = new Schema ({
     imgUrl: String,
     comment: Array,
     react: Array,
+    // Real
 },
     { timestamps: true }
 );
