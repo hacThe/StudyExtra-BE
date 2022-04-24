@@ -5,18 +5,8 @@ const ArticleSchema = new Schema ({
     userID: String,
     content: String,
     imgUrl: [
-        {
-            concreteImgUrl: String
-        }
     ],
     comments: [
-        {
-            commentID: String,
-            userID: String,
-            content: String,
-            type: String,
-            userTagID: String,
-        }
     ],    
 },
     { timestamps: true }
