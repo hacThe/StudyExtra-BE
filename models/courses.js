@@ -2,18 +2,19 @@ const mongoose = require ('mongoose')
 const Schema = mongoose.Schema;
 
 const CoursesSchema = new Schema ({
-    _id:{
-        courseID: String,
-    },
+    courseId: String,
     name: String,
     description: String,
-    content: Array,
+    contents: Array,
     price: Number,
     imgUrl: String,
-    chapter: Array,
-    categogy: String,
+    introVideoUrl: String,
+    chapters: Array,
+    categories: Array,
     rating: Array,
-    studentId: Array,
+    studentIds: Array,
+    requirements: Array,
+    isHide: Boolean
 },
     { timestamps: true }
 );
