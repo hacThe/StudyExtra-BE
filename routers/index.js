@@ -7,6 +7,7 @@ const documentRouter = require('./document');
 const searchController = require('./search')
 const examController = require('./exam');
 const articleRouter  = require('./article');
+const typeCategoryRouter = require('./typeCategory');
 
 function route(app) {
     app.use("/api/search", searchController)
@@ -18,7 +19,7 @@ function route(app) {
     app.use("/api/document", documentRouter);
     app.use("/api/article", articleRouter);
     app.use("/api/exam", examController);
-
+    app.use("/api/type-category", typeCategoryRouter);
     //app.use("/", (req, res) => res.send('hello'));
 }
 
