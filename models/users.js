@@ -14,6 +14,7 @@ const UserSchema = new Schema ({
     phone: String,
     role: String,
     mail: String,
+    emailVerified: Boolean,
     avatar: String,
     courseID: Array,
     gem: Number,
