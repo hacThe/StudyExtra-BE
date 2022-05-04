@@ -7,7 +7,7 @@ const documentController = require('./document');
 const searchController = require('./search')
 const examController = require('./exam');
 
-function route(app) {W
+function route(app) {
     app.use("/api/search", searchController)
     app.use("/api/posts", postsRouter);
     app.use("/api/courses", coursesRouter);
