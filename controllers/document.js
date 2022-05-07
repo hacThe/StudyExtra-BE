@@ -1,4 +1,5 @@
 const Document = require("../models/document");
+var mongoose = require('mongoose');
 class DocumentController {
     getAllDocument = async (req, res) => {
         console.log("nav to get document");
@@ -18,28 +19,15 @@ class DocumentController {
     addNewDocument = async(req, res) => {
         console.log("req.body", req.body);
         var newDocument = new Document({
-            documentID: req.body.documentID,
+            _id: mongoose.Types.ObjectId(),
+            documentID: mongoose.Types.ObjectId().toString(),
             name: req.body.name,
             typeID: req.body.typeID,
             views: req.body.views,
             link: req.body.link,
+            author: req.body.author,
             isHidden: false,
         })
-        
-
-        // newDocument.save()
-        //     .then((data) => {
-        //         res.status(200).send({
-        //             JSON.stringify({
-        //                 success: true,
-        //                 data: data
-        //             })
-        //         });
-        //     })
-        //     .catch(error){
-        //         res.status(404).send(error);
-        //     }
-        // )
         newDocument.save()
         .then((data) =>{
             res.status(200).send({
