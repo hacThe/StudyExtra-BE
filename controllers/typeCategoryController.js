@@ -3,6 +3,7 @@ var mongoose = require('mongoose');
 class typeCategoryController{
     getAllTypeCategory = async (req, res) => {
         // console.log("nav to get document");
+        console.log("get req.body", req.body);
         typeCategory.find().exec()
         .then((data) => {
             res.status(200).send(
@@ -64,7 +65,7 @@ class typeCategoryController{
 
     deleteTypeCategory = async(req, res) => {
         console.log(req.body);
-        typeCategory.findOneAndDelete({_id: req.body._id}, {name: req.body.newName})
+        typeCategory.findOneAndDelete({_id: req.body._id})
         .then((data) => {
             res.status(200).send(
                 JSON.stringify({

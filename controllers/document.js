@@ -44,7 +44,7 @@ class DocumentController {
         .then((data) =>{
             res.status(200).send({
                 success: true,
-                data: data
+                data: data,
             });
         })
         .catch((error)=>{
