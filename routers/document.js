@@ -5,5 +5,6 @@ const documentController = require('../controllers/document');
 
 router.get('/', documentController.getAllDocument);
 router.post('/', documentController.addNewDocument);
+router.delete('/', documentController.deleteDocuments);
 
 module.exports = router; 
