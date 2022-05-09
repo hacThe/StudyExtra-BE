@@ -1,7 +1,8 @@
-const mongoose = require ('mongoose')
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const CoursesSchema = new Schema ({
+const CoursesSchema = new Schema(
+  {
     courseId: String,
     name: String,
     description: String,
@@ -9,15 +10,15 @@ const CoursesSchema = new Schema ({
     price: Number,
     imgUrl: String,
     introVideoUrl: String,
-    chapters: Array,
+    chapters: [{ type: Schema.Types.ObjectId, ref: "chapters" }],
     categories: Array,
     rating: Array,
     studentIds: Array,
     requirements: Array,
-    isHide: Boolean
-},
-    { timestamps: true }
+    isHide: Boolean,
+  },
+  { timestamps: true }
 );
 
-const Course = mongoose.model('courses', CoursesSchema);
+const Course = mongoose.model("courses", CoursesSchema);
 module.exports = Course;
