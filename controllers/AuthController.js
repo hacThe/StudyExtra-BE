@@ -1,6 +1,10 @@
 const User = require("../models/users");
+const Token = require("../models/emailtoken")
 const { JWTAuthToken } = require("../helper/JWT");
+const crypto = require("crypto");
+const sendEmail = require("../utils/sendEmail");
 const bcrypt = require("bcrypt");
+const { verify } = require("jsonwebtoken");
 const saltRounds = 10;
 
 class AuthController {
@@ -9,14 +13,15 @@ class AuthController {
     const password = bcrypt.hashSync(req.body.password, saltRounds);
     const name = req.body.name;
     const phone = req.body.phone;
-    const role = req.body.role;
+    const role = "user";
     const mail = req.body.mail;
-    const avatar = req.body.avatar;
-    const courseID = req.body.courseID;    
-    const gem = req.body.gem;
-    const birthday = req.body.birthday;   
-    const pointID = req.body.pointID;    
-    const gender = req.body.gender;
+    const emailVerified = false;
+    const avatar = '/default-avatar';
+    const courseID = [];
+    const gem = 0;
+    const birthday = new Date();
+    const pointID = [];
+    const gender = "nam";
     console.log({ username, password });
 
     User.findOne({ username: username })
@@ -36,6 +41,7 @@ class AuthController {
             phone,
             role,
             mail,
+            emailVerified,
             avatar,
             courseID,
             gem,
@@ -55,6 +61,15 @@ class AuthController {
                 data,
               })
             );
+
+            const token = new Token({
+              username: username,
+              token: crypto.randomBytes(32).toString("hex"),
+            }).save().then((data) => {
+              console.log("tokennnnn: ", data)
+              const url = `${process.env.FE_URL}/xac-nhan-email/${username}/${data.token}`;
+              sendEmail(mail, "Verify Email", url);
+            });
           });
         }
       })
@@ -67,7 +82,7 @@ class AuthController {
         );
       });
   };
-
+  //---------------------------------------------------------------LOGIN--------------------------------------------------------------------------//
   login = async (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
@@ -78,7 +93,7 @@ class AuthController {
         //check password, if password is correct then get all data and respond for client
         if (bcrypt.compareSync(password, data.password)) {
 
-          const {password, ...user} = data._doc
+          const { password, ...user } = data._doc
 
           res
             .status(200)
@@ -101,7 +116,7 @@ class AuthController {
         );
       });
   };
-
+  //---------------------------------------------------------------------------------------------------------------------------------------------//
   refresh = async (req, res) => {
     console.log("Access to auth controller success");
     res.status(200).send(
@@ -114,6 +129,29 @@ class AuthController {
       })
     );
   };
+
+
+  //----------------------------------------------------verify-email-----------------------------------------------------------------------------//
+  verifyEmail = async (req, res) => {
+    try {
+      const user = await User.findOne({ username: req.params.id });
+      if (!user) return res.status(400).send({ message: "Invalid link" });
+      console.log("user: ", user);
+      const token = await Token.findOne({
+        username: user.username,
+        token: req.params.token,
+      });
+      if (!token) return res.status(400).send({ message: "Invalid link" });
+
+      await User.updateOne({ username: user.username, emailVerified: true });
+      await token.remove();
+
+      res.status(200).send({ message: "Email verified successfully" });
+    } catch (error) {
+      res.status(500).send({ message: "Internal Server Error" });
+    }
+  };
 }
+
 
 module.exports = new AuthController();
