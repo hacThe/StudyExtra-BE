@@ -2,18 +2,55 @@ const Document = require("../models/document");
 var mongoose = require('mongoose');
 class DocumentController {
     getAllDocument = async (req, res) => {
-        console.log("nav to get document");
-        Document.find().exec()
-        .then((data) => {
-            res.status(200).send(
-                JSON.stringify({
-                    data: data
-                })
-            )
-        })
-        .catch((error) => {
-            res.status(404).send(error);
-        })
+        console.log("req.query.id", req.query.id);
+        if(typeof req.query.id == 'undefined'){
+            Document.find().exec()
+            .then((data) => {
+                res.status(200).send(
+                    JSON.stringify({
+                        success: true,
+                        data: data
+                    })
+                )
+            })
+            .catch((error) => {
+                res.status(404).send(
+                    JSON.stringify({
+                        success: false,
+                        error: error
+                    })
+                );
+            })
+        }
+        else {
+            try{
+                var newI = await Document.findById(req.query.id);
+                if(newI!=null){
+                    res.status(200).send(
+                        JSON.stringify({
+                            data: newI
+                        })
+                    )
+                }
+                else{
+                    res.status(200).send(
+                        JSON.stringify({
+                            success: true,
+                            found: false
+                        })
+                    )
+                }
+            }
+            catch(e){
+                res.status(404).send(
+                    JSON.stringify({
+                        success: false,
+                        error: e,
+                    })
+                );
+            }
+        }
+        
     }
 
     addNewDocument = async(req, res) => {
@@ -42,8 +79,8 @@ class DocumentController {
     }   
 
     deleteDocuments = async(req, res) => {
-        console.log(req.body);
-        Document.deleteMany({_id : { $in: [...req.body.listID]}})
+        // console.log(Object.values(req.body.data));
+        Document.deleteMany({_id : { $in: [...Object.values(req.body.data)]}})
         .then((data) =>{
             res.status(200).send({
                 success: true,
