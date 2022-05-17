@@ -38,10 +38,9 @@ class AccountController {
 
     uploadAvatar = async (req, res) => {
         const username = res.locals.data.username;
-      //  const username = "tanthanh1";
         const avatarUrl = req.body.avatarUrl;
-        console.log("urlllllllllllllllllllllllllllllllll", avatarUrl)
-
+        /* console.log("avatarUrl:", avatarUrl)
+ */
         User.updateOne({ username: username }, { $set: { "avatar": avatarUrl } }).exec()
             .then(() => {
                 User.findOne({ username: username }).exec()
@@ -55,6 +54,63 @@ class AccountController {
                     })
                     .catch((error) => {
                         res.status(404).send(error);
+                    })
+            })
+            .catch((error) => {
+                res.status(404).send(error);
+            })
+    }
+
+
+    updateProfile = async (req, res) => {
+        //const username = res.locals.data.username;
+        const username = "tanthanh3";
+        const name = req.body.fullname;
+        const birthday = req.body.birthday;
+        const mail = req.body.email;
+        const phone = req.body.phone;
+
+
+        User.findOne({ username: username }).exec()
+            .then((data) => {
+                console.log("user update: " + data)
+                const newInfo = {
+                    "name": name,
+                    "birthday": birthday,
+                    "mail": mail,
+                    "phone": phone
+                }
+                if (data.mail !== mail) {
+                    newInfo.emailVerified = false;
+                }
+
+                User.updateOne({ username: username }, { $set: newInfo }).exec()
+                    .then((data) => {
+                        User.findOne({ username: username }).exec()
+                            .then((data) => {
+                                res.status(200).send(
+                                    JSON.stringify({
+                                        message: "update successfully",
+                                        user: data
+                                    })
+                                )
+                            })
+                            .catch((err) => {
+                                res.status(400).send(
+                                    JSON.stringify({
+                                        message: "update failure",
+                                        error: err
+                                    })
+                                )
+                            })
+                    })
+                    .catch((err) => {
+                        res.status(400).send(
+                            JSON.stringify({
+                                message: "update failure",
+                                error: err
+                            })
+                        )
                     })
             })
             .catch((error) => {
