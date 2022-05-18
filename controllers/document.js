@@ -78,6 +78,33 @@ class DocumentController {
         })
     }   
 
+    editDocument = async(req, res) => {
+        console.log(req.body);
+        var newI = await Document.findOne({_id: req.body._id});
+        console.log("newI", newI);
+
+        Document.findOneAndUpdate({_id: req.body._id}, 
+            {
+                name: req.body.name,
+                typeID: req.body.typeID,
+                author: req.body.author,
+                views: req.body.views,
+                link: req.body.link,
+            }
+        ).then((data) => {
+            res.status(200).send(
+                JSON.stringify({
+                    data,
+                })
+            );   
+        })
+        .catch((err) => {
+            res.status(404).send({run: false, err: err});
+        });
+
+        // res.status(200).send({run:true});
+    }
+
     deleteDocuments = async(req, res) => {
         // console.log(Object.values(req.body.data));
         Document.deleteMany({_id : { $in: [...Object.values(req.body.data)]}})
