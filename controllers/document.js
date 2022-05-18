@@ -63,7 +63,7 @@ class DocumentController {
             views: req.body.views,
             link: req.body.link,
             author: req.body.author,
-            isHidden: false,
+            isHidden: req.body.isHidden,
         })
         newDocument.save()
         .then((data) =>{
@@ -79,7 +79,7 @@ class DocumentController {
     }   
 
     editDocument = async(req, res) => {
-        console.log(req.body);
+        console.log("edit, body",req.body);
         var newI = await Document.findOne({_id: req.body._id});
         console.log("newI", newI);
 
@@ -90,6 +90,7 @@ class DocumentController {
                 author: req.body.author,
                 views: req.body.views,
                 link: req.body.link,
+                isHidden: req.body.isHidden
             }
         ).then((data) => {
             res.status(200).send(
