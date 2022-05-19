@@ -29,8 +29,8 @@ class SendEmail {
             console.log("email sent successfully");
         } catch (error) {
             console.log("email not sent!");
-            console.log(error);
-            return error;
+            console.log(error.toString());
+            return Promise.reject(error.toString());
         }
     }
 
@@ -57,7 +57,7 @@ class SendEmail {
         } catch (error) {
             console.log("email not sent!");
             console.log(error);
-            return error;
+            return Promise.reject(error.toString());
         }
     }
 

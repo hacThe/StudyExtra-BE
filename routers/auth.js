@@ -11,7 +11,7 @@ router.post("/sendVerifyCode", AuthController.sendVerifyCode);//forgot password
 router.post("/verifyCode", AuthController.verifyCode);//forgot password
 router.post("/setNewPassword", AuthController.setNewPassword);//forgot password
 router.post("/resetPassword", AuthMiddleware, AuthController.resetPassword);//reset password password
-
+router.get("/resendVerifyEmail", AuthMiddleware,  AuthController.resendVerifyEmail);//
 
 
 module.exports = router;
