@@ -63,8 +63,7 @@ class AccountController {
 
 
     updateProfile = async (req, res) => {
-        //const username = res.locals.data.username;
-        const username = "tanthanh3";
+        const username = res.locals.data.username;
         const name = req.body.fullname;
         const birthday = req.body.birthday;
         const mail = req.body.email;

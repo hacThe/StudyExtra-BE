@@ -9,6 +9,7 @@ const examController = require('./exam');
 const articleRouter  = require('./article');
 const typeCategoryRouter = require('./typeCategory');
 const announcementRouter = require('./announcement');
+const transactionRouter = require('./transaction')
 
 function route(app) {
     app.use("/api/search", searchController)
@@ -22,6 +23,8 @@ function route(app) {
     app.use("/api/exam", examController);
     app.use("/api/type-category", typeCategoryRouter);
     app.use("/api/announcement", announcementRouter);
+    app.use("/api/transaction", transactionRouter);
+
     //app.use("/", (req, res) => res.send('hello'));
 }
 
