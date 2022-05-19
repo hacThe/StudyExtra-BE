@@ -68,6 +68,8 @@ class AccountController {
         const birthday = req.body.birthday;
         const mail = req.body.email;
         const phone = req.body.phone;
+        const gender = req.body.gender;
+
 
 
         User.findOne({ username: username }).exec()
@@ -77,7 +79,8 @@ class AccountController {
                     "name": name,
                     "birthday": birthday,
                     "mail": mail,
-                    "phone": phone
+                    "phone": phone,
+                    "gender": gender
                 }
                 if (data.mail !== mail) {
                     newInfo.emailVerified = false;

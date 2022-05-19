@@ -22,9 +22,9 @@ class AuthController {
     const avatar = '/default-avatar';
     const courseID = [];
     const gem = 0;
-    const birthday = new Date();
+    const birthday = req.body.birthday;
     const pointID = [];
-    const gender = "nam";
+    const gender = req.body.gender;
     console.log({ username, password });
 
     User.findOne({ username: username })
