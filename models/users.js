@@ -16,11 +16,11 @@ const UserSchema = new Schema ({
     mail: String,
     emailVerified: Boolean,
     avatar: String,
-    courseID: Array,
+    courseID: [{ type: Schema.Types.ObjectId, ref: "courses" }],
     gem: Number,
     birthday: Date,
     pointID: Array,
-    gender: String
+    gender: String,
 },
     { timestamps: true }
 );
