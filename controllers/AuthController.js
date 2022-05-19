@@ -240,6 +240,24 @@ class AuthController {
 
   }
 
+  resetPassword = async (req, res) => {
+
+    const {newPassword} = req.body
+    const username = res.locals.data.username
+
+    User.updateOne({username: username}, { password: bcrypt.hashSync(newPassword, saltRounds) }).exec()
+    .then(()=>{
+      res.status(200).send(
+        JSON.stringify({
+          message: "success"
+        })
+      )
+    })
+    .catch((error)=>{
+      res.status(400).send(error);
+    })
+  }
+
 }
 
 
