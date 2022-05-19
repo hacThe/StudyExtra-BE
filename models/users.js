@@ -20,7 +20,8 @@ const UserSchema = new Schema ({
     gem: Number,
     birthday: Date,
     pointID: Array,
-    gender: String
+    gender: String,
+    transactions: [{ type: Schema.Types.ObjectId, ref: "transactions" }],
 },
     { timestamps: true }
 );

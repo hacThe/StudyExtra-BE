@@ -1,7 +1,9 @@
+const { ObjectId } = require('mongodb');
 const mongoose = require ('mongoose')
 const Schema = mongoose.Schema;
 
 const TransactionSchema = new Schema ({
+    userID: [{ type: Schema.Types.ObjectId, ref: "chapters" }],
     username: {
         type: String,
         required: true,

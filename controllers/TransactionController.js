@@ -18,6 +18,7 @@ class TransactionController {
             )
             const balance = user.gem + amount;
             const transaction = new Transaction({
+                userID: user._id,
                 username: username,
                 amount: amount,
                 balance: balance,
