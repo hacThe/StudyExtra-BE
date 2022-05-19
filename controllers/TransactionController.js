@@ -4,8 +4,8 @@ const Transaction = require("../models/transaction");
 
 class TransactionController {
     createDepositRequest = async (req, res) => {
-       // const username = "tanthanh3"
-       const username = res.locals.data.username
+        // const username = "tanthanh3"
+        const username = res.locals.data.username
         const amount = req.body.amount
         const context = req.body.context
 
@@ -34,13 +34,35 @@ class TransactionController {
                     })
                 )
             })
-            .catch((error)=>{
-                res.status(400).send(error);
-            })
+                .catch((error) => {
+                    res.status(400).send(error);
+                })
         }
         catch (error) {
             res.status(400).send(error);
         }
+    }
+    getUserTransaction = async (req, res) => {
+        // const username = 'tanthanh3'
+        const username = res.locals.data.username
+        Transaction.find({ username: username, status: "complete" }).sort({ createdAt: -1 }).exec()
+            .then((data) => {
+                res.status(200).send(
+                    JSON.stringify({
+                        data: data,
+                        message: "success"
+                    })
+                )
+            })
+            .catch((error) => {
+                res.status(400).send(
+                    JSON.stringify({
+                        message: "failure",
+                        error: error
+                    })
+                )
+            })
+
     }
 
 }
