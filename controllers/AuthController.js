@@ -47,7 +47,8 @@ class AuthController {
             gem,
             birthday,
             pointID,
-            gender
+            gender,
+            isLock: false
           });
 
           newUser.save().then((data) => {

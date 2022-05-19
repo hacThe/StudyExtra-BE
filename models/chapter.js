@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const ChaptersSchema = new Schema ({
     courseId: { type: Schema.Types.ObjectId, ref: 'courses' },
     name: String,
-    lessons: Array,
+    lessons: [{ type: Schema.Types.ObjectId, ref: "lessons" }],
 },
     { timestamps: true }
 );

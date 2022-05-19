@@ -20,7 +20,8 @@ const UserSchema = new Schema ({
     gem: Number,
     birthday: Date,
     pointID: Array,
-    gender: String
+    gender: String,
+    isLock: Boolean, // Check xem tài khoản có đang khóa hay không
 },
     { timestamps: true }
 );

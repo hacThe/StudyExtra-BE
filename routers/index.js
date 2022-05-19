@@ -9,9 +9,11 @@ const examController = require('./exam');
 const articleRouter  = require('./article');
 const typeCategoryRouter = require('./typeCategory');
 const announcementRouter = require('./announcement');
+const userRoute = require('./user');
 
 function route(app) {
     app.use("/api/search", searchController)
+    app.use("/api/users", userRoute)
     app.use("/api/posts", postsRouter);
     app.use("/api/courses", coursesRouter);
     app.use("/api/profiles", profilesRouter);

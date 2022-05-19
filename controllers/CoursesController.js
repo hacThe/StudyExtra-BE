@@ -1,6 +1,7 @@
 const { RenameObjectKey } = require("../helper/RenameObjectKey");
 const Chapter = require("../models/chapter");
 const Course = require("../models/courses");
+const Lesson = require("../models/lessons");
 const ObjectId = require("mongodb").ObjectID;
 class CoursesController {
   getAllCourses = async (req, res) => {
@@ -59,24 +60,13 @@ class CoursesController {
   getOne = async (req, res) => {
     const id = req.params.id;
     Course.findOne({ courseId: id })
-      .populate("chapters")
+      .populate({
+        path: "chapters",
+        populate: { path: "lessons" },
+      })
       .exec()
       .then((course) => {
         if (course) {
-          course.chapters.map((item) => {
-            Chapter.findById(item, function (err, crrChapter) {
-              if (!err) {
-                return crrChapter;
-              }
-
-              return {
-                name: "",
-                lessons: [],
-              };
-            });
-          });
-          console.log({ course });
-
           res.status(200).send(
             JSON.stringify({
               data: course,
@@ -175,12 +165,12 @@ class CoursesController {
                 );
               } else {
                 const { name, index } = req.body;
-                const _chapter = new Chapter({
+                const _lesson = new Chapter({
                   name,
                   courseId: req.params.id,
                   lessons: [],
                 });
-                _chapter
+                _lesson
                   .save()
                   .then((chapter) => {
                     Course.findById(req.params.id, function (err, course) {
@@ -206,11 +196,9 @@ class CoursesController {
       });
   };
 
-
-
-  editChapter = async (req, res) =>{
-    const id = req.params.id
-    const chapter = req.body
+  editChapter = async (req, res) => {
+    const id = req.params.id;
+    const chapter = req.body;
     Chapter.findOneAndUpdate(
       {
         _id: ObjectId(id),
@@ -223,18 +211,190 @@ class CoursesController {
       {
         returnOriginal: false,
       },
-      function (err, data) {
+      function (err, chapter) {
         if (err) {
           res.status(404).send(err);
         } else {
-          console.log(data)
-          res.redirect(
-            `./courses/${data.courseId}`
-          );
+          Course.findById(chapter.courseId, function (err, course) {
+            if (!err) {
+              if (course.chapters.indexOf(chapter._id) != req.body.index) {
+                course.chapters.splice(course.chapters.indexOf(chapter._id), 1);
+                course.chapters.splice(req.body.index, 0, chapter._id);
+              }
+              course.save().then((editedCourse) => {
+                res.redirect(303,`../../courses/${editedCourse.courseId}`);
+              });
+            } else {
+              res.status(500).send(JSON.stringify(err));
+            }
+          });
         }
       }
     );
-  }
+  };
+
+  deleteChapter = async (req, res) => {
+    const id = req.params.id;
+    const courseId = req.body.courseId;
+    Chapter.deleteOne({ _id: ObjectId(id) })
+      .then((data) => {
+        Course.findById(courseId, function (err, course) {
+          if (!err) {
+            course.chapters.splice(course.chapters.indexOf(id), 1);
+            course.save().then((editedCourse) => {
+              res.redirect(303,`../../../courses/${editedCourse.courseId}`);
+            });
+
+            Lesson.deleteMany({chapterId: id}).then((data)=>{
+              console.log({data})
+            }).catch(err=>{
+              console.log({err})
+            })
+          } else {
+            res.status(500).send(JSON.stringify(err));
+          }
+        });
+      })
+      .catch((err) => {
+        res.status(404).send(err);
+      });
+  };
+
+
+  
+  deleteLesson = async (req, res) => {
+    const id = req.params.id;
+    const chapterId = req.body.chapterId;
+    Lesson.deleteOne({ _id: ObjectId(id) })
+      .then((data) => {
+        Chapter.findById(chapterId, function (err, chapter) {
+          if (!err && chapter) {
+            chapter.lessons.splice(chapter.lessons.indexOf(id), 1);
+            chapter.save().then((editedChapter) => {
+              Course.findById(editedChapter.courseId)
+                  .then((course) => {
+                    res.redirect(303,`../../../courses/${course.courseId}`);
+                  })
+                  .catch((err) => {
+                    console.log(err, "err nè");
+                    res.status(400).send({ message: err });
+                  });
+            });
+
+          } else {
+            res.status(500).send(JSON.stringify(err));
+          }
+        });
+      })
+      .catch((err) => {
+        res.status(404).send(err);
+      });
+  };
+
+  addLesson = async (req, res) => {
+    console.log(req.params.id);
+
+    Chapter.findOne({
+      _id: ObjectId(req.params.id),
+    })
+      .exec()
+      .then((data) => {
+        if (data) {
+          Lesson.findOne({
+            name: req.body.name,
+          })
+            .exec()
+            .then((lesson) => {
+              if (lesson) {
+                res.status(400).send(
+                  JSON.stringify({
+                    message: "Name duplicated",
+                  })
+                );
+              } else {
+                console.log("Tạo");
+                const { videoUrl, documentUrl, name, chapter, index } =
+                  req.body;
+                const _lesson = new Lesson({
+                  name,
+                  documentUrl,
+                  chapterId: chapter,
+                  videoUrl,
+                });
+                _lesson
+                  .save()
+                  .then((lesson) => {
+                    Chapter.findById(req.params.id, function (err, chapter) {
+                      if (!err) {
+                        chapter.lessons.splice(index, 0, lesson._id);
+                        chapter.save().then((editedChapter) => {
+                          Course.findById(editedChapter.courseId)
+                            .then((course) => {
+                              res.redirect(`../../courses/${course.courseId}`);
+                            })
+                            .catch((err) => {
+                              console.log(err, "err nè");
+                              res.status(400).send({ message: err });
+                            });
+                        });
+                      }
+                    });
+                  })
+                  .catch((err) => {
+                    console.log(err, "err nè");
+                    res.status(400).send({ message: err });
+                  });
+              }
+            });
+        } else {
+          res.status(404).send({ message: "Course not found" });
+        }
+      });
+  };
+
+  editLesson = async (req, res) => {
+    const id = req.params.id;
+    const lesson = req.body;
+    Lesson.findOneAndUpdate(
+      {
+        _id: ObjectId(id),
+      },
+      {
+        $set: {
+          ...lesson,
+        },
+      },
+      {
+        returnOriginal: false,
+      },
+      function (err, lesson) {
+        if (err) {
+          res.status(404).send(err);
+        } else {
+          Chapter.findById(lesson.chapterId, function (err, chapter) {
+            if (!err) {
+              if (chapter.lessons.indexOf(lesson._id) != req.body.index) {
+                chapter.lessons.splice(chapter.lessons.indexOf(lesson._id), 1);
+                chapter.lessons.splice(req.body.index, 0, lesson._id);
+              }
+              chapter.save().then((editedChapter) => {
+                Course.findById(editedChapter.courseId)
+                  .then((course) => {
+                    res.redirect(303,`../../courses/${course.courseId}`);
+                  })
+                  .catch((err) => {
+                    console.log(err, "err nè");
+                    res.status(400).send({ message: err });
+                  });
+              });
+            } else {
+              res.status(500).send(JSON.stringify(err));
+            }
+          });
+        }
+      }
+    );
+  };
 }
 
 module.exports = new CoursesController();
