@@ -1,27 +1,30 @@
 const User = require("../models/users");
 const Token = require("../models/emailtoken")
+const PasswordToken = require("../models/passwordtoken")
 const { JWTAuthToken } = require("../helper/JWT");
 const crypto = require("crypto");
-const sendEmail = require("../utils/sendEmail");
+const SendEmail = require("../utils/sendEmail");
 const bcrypt = require("bcrypt");
 const { verify } = require("jsonwebtoken");
+const req = require("express/lib/request");
+const res = require("express/lib/response");
 const saltRounds = 10;
 
 class AuthController {
   register = async (req, res) => {
     const username = req.body.username;
     const password = bcrypt.hashSync(req.body.password, saltRounds);
-    const name = req.body.name;
+    const name = req.body.fullname;
     const phone = req.body.phone;
     const role = "user";
-    const mail = req.body.mail;
+    const mail = req.body.email;
     const emailVerified = false;
     const avatar = '/default-avatar';
     const courseID = [];
     const gem = 0;
-    const birthday = new Date();
+    const birthday = req.body.birthday;
     const pointID = [];
-    const gender = "nam";
+    const gender = req.body.gender;
     console.log({ username, password });
 
     User.findOne({ username: username })
@@ -67,9 +70,9 @@ class AuthController {
               username: username,
               token: crypto.randomBytes(32).toString("hex"),
             }).save().then((data) => {
-              console.log("tokennnnn: ", data)
+              console.log("verify email token: ", data)
               const url = `${process.env.FE_URL}/xac-nhan-email/${username}/${data.token}`;
-              sendEmail(mail, "Verify Email", url);
+              SendEmail.verifyEmail(mail, "Verify Email", url);
             });
           });
         }
@@ -152,6 +155,92 @@ class AuthController {
       res.status(500).send({ message: "Internal Server Error" });
     }
   };
+
+
+  sendVerifyCode = async (req, res) => {
+    const username = req.body.username;
+    await PasswordToken.deleteMany({username: username}).exec()
+        .then(
+          ()=> console.log("old tokens has deleted!")
+        )
+        .catch((err) => {
+          console.log(err);
+        })
+
+    await User.findOne({ username: username }).exec()
+      .then((data) => {
+        const mail = data.mail;
+
+        const token = new PasswordToken({
+          username: username,
+          token: Math.random().toString(16).substring(2, 8),
+        }).save().then((data) => {
+          console.log("forgot password token: ", data)
+          SendEmail.verifyPassword(mail, "Verify Password", data.token);
+
+          res.status(200).send(
+            JSON.stringify({
+              email: mail,
+              message: "Email sent successfully"
+            })
+          )
+        })
+        .catch((err)=>{
+          res.status(400).send(
+            JSON.stringify({
+              message: "Send email failure, token has existed",
+              error: err.toString()
+            })
+          );
+        })
+      })
+      .catch((err) => {
+        res.status(400).send(
+          JSON.stringify({
+            message: "User not found",
+            error: err.toString()
+          })
+        );
+      })
+  }
+
+  verifyCode = async (req, res) => {
+    const username = req.body.username;
+    const verifyCode = req.body.verifyCode;
+
+    const token = await PasswordToken.findOne({
+      username: username,
+      token: verifyCode,
+    });
+    if (!token) return res.status(400).send({ message: "Invalid code" });
+
+    res.status(200).send({ message: "Valid code" });
+  }
+
+  setNewPassword = async (req, res) => {
+
+    try {
+      const newPassword = req.body.newPassword;
+      const username = req.body.username;
+      const verifyCode = req.body.verifyCode;
+      const token = await PasswordToken.findOne({
+        username: username,
+        token: verifyCode,
+      });
+      if (!token) return res.status(400).send({ message: "Invalid code" });
+
+      const user = await User.updateOne({ username: username }, { password: bcrypt.hashSync(newPassword, saltRounds) }).exec()
+      if (user) {
+       // await token.remove();
+        return res.status(200).send({ message: "Update successfully" });
+      }
+      return res.status(400).send({ message: "Update failure" });
+    } catch (error) {
+      return res.status(400).send({ message: "Update failure" });
+    }
+
+  }
+
 }
 
 

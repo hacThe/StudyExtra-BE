@@ -7,6 +7,11 @@ router.post("/login", AuthController.login)
 router.post("/register", AuthController.register)
 router.get("/refresh", AuthMiddleware, AuthController.refresh);
 router.get("/:id/verify/:token/", AuthController.verifyEmail);
+router.post("/sendVerifyCode", AuthController.sendVerifyCode);//forgot password
+router.post("/verifyCode", AuthController.verifyCode);//forgot password
+router.post("/setNewPassword", AuthController.setNewPassword);//forgot password
+
+
 
 
 module.exports = router;

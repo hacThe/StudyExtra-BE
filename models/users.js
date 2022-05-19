@@ -22,6 +22,7 @@ const UserSchema = new Schema ({
     pointID: Array,
     gender: String,
     isLock: Boolean, // Check xem tài khoản có đang khóa hay không
+    transactions: [{ type: Schema.Types.ObjectId, ref: "transactions" }],
 },
     { timestamps: true }
 );
