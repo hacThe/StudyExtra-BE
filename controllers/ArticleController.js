@@ -31,6 +31,7 @@ class ArticleController {
         var summaryData = [];
         for(var i = 0; i < dataArticle.length; i++){
             var currentData = {
+                ...dataArticle[i]._doc,
                 userID : dataArticle[i].userID,
                 content: dataArticle[i].content,
                 imgUrl: dataArticle[i].imgUrl,
@@ -42,6 +43,7 @@ class ArticleController {
                     isFindUser = true;
                     currentData.username = userData[j].username,
                     currentData.avatar = userData[j].avatar;
+                    currentData.name = userData[j].name;
                     break;
                 }
             }
@@ -89,11 +91,13 @@ class ArticleController {
 
         var username = "";
         var userAvatar = "";
+        var name = "";
 
         for(var j = 0; j < userData.length; j++){
             if(newArticle.userID == userData[j]._id){
                 username = userData[j].username,
                 userAvatar = userData[j].avatar;
+                name = userData[j].name;
                 break;
             }
         }
@@ -105,6 +109,7 @@ class ArticleController {
                 data: {
                     ...data._doc,
                     username: username,
+                    name: name,
                     avatar:userAvatar,
                 },
             });
