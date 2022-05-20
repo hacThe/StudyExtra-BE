@@ -3,7 +3,7 @@ const mongoose = require ('mongoose')
 const Schema = mongoose.Schema;
 
 const TransactionSchema = new Schema ({
-    userID: { type: Schema.Types.ObjectId, ref: "user" },
+    userID: { type: Schema.Types.ObjectId, ref: "users" },
     username: {
         type: String,
         required: true,
@@ -34,5 +34,5 @@ const TransactionSchema = new Schema ({
     { timestamps: true }
 );
 
-const Transaction = mongoose.model('transaction', TransactionSchema);
+const Transaction = mongoose.model('transactions', TransactionSchema);
 module.exports = Transaction;

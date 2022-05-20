@@ -6,6 +6,7 @@ const User = require("../models/users");
 class userController {
   getAllUser = async (req, res) => {
     User.find()
+    .populate('transactions')
       .exec()
       .then((data) => {
         res.status(200).send(
