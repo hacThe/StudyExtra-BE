@@ -138,15 +138,15 @@ class AuthController {
   verifyEmail = async (req, res) => {
     try {
       const user = await User.findOne({ username: req.params.id });
-      if (!user) return  res.status(400).send("user not found");
+      if (!user) return res.status(400).send("user not found");
       console.log("user: ", user);
       const token = await Token.findOne({
         username: user.username,
         token: req.params.token,
       });
-      if (!token) return  res.status(400).send("token not found");
+      if (!token) return res.status(400).send("token not found");
 
-      await User.updateOne({ username: user.username}, {emailVerified: true });
+      await User.updateOne({ username: user.username }, { emailVerified: true });
       await token.remove();
 
       res.status(200).send({ message: "Email verified successfully" });
@@ -164,26 +164,26 @@ class AuthController {
         () => console.log("old tokens has deleted!")
       )
       .catch((err) => {
-        return  res.status(400).send(err);
+        return res.status(400).send(err);
       })
 
     await User.findOne({ username: username }).exec()
       .then((data) => {
-        if(!data) return  res.status(400).send("user not found");
+        if (!data) return res.status(400).send("user not found");
         const mail = data.mail;
         const token = new PasswordToken({
           username: username,
           token: Math.random().toString(16).substring(2, 8),
         }).save().then((data) => {
           console.log("forgot password token: ", data)
-          SendEmail.verifyPassword(mail, "Verify Password", data.token).then(()=>{
+          SendEmail.verifyPassword(mail, "Verify Password", data.token).then(() => {
             res.status(200).send(
               JSON.stringify({
                 email: mail,
                 message: "Email sent successfully"
               })
             )
-          }).catch((error)=>{
+          }).catch((error) => {
             return res.status(400).send(
               JSON.stringify({
                 message: error
@@ -233,7 +233,7 @@ class AuthController {
         username: username,
         token: verifyCode,
       });
-      if (!token) return res.status(400).send( "Invalid code" );
+      if (!token) return res.status(400).send("Invalid code");
 
       const user = await User.updateOne({ username: username }, { password: bcrypt.hashSync(newPassword, saltRounds) }).exec()
       if (user) {
@@ -249,16 +249,24 @@ class AuthController {
 
   resetPassword = async (req, res) => {
 
-    const { newPassword } = req.body
+    const { oldPassword, newPassword } = req.body
     const username = res.locals.data.username
 
-    User.updateOne({ username: username }, { password: bcrypt.hashSync(newPassword, saltRounds) }).exec()
-      .then(() => {
-        res.status(200).send(
-          JSON.stringify({
-            message: "success"
+    User.findOne({ username: username }).exec()
+      .then((data) => {
+        if (!data) return res.status(400).send("User not found");
+        if (!bcrypt.compareSync(oldPassword, data.password)) return res.status(400).send("Password is not correct");
+        User.updateOne({ username: username }, {password: bcrypt.hashSync(newPassword, saltRounds)}).exec()
+          .then(() => {
+            res.status(200).send(
+              JSON.stringify({
+                message: "success"
+              })
+            )
           })
-        )
+          .catch((err) => {
+            res.status(400).send(err);
+          })
       })
       .catch((error) => {
         res.status(400).send(error);
@@ -268,7 +276,7 @@ class AuthController {
   resendVerifyEmail = async (req, res) => {
 
     const username = res.locals.data.username;
-   // const username = "tanthanh1"
+    // const username = "tanthanh1"
     await Token.deleteMany({ username: username }).exec()
       .then(
         () => console.log("Old email tokens has deleted!")
@@ -279,7 +287,7 @@ class AuthController {
 
     await User.findOne({ username: username }).exec()
       .then((data) => {
-        if(!data) return  res.status(400).send("user not found");
+        if (!data) return res.status(400).send("user not found");
         const mail = data.mail;
         const token = new Token({
           username: username,
@@ -287,30 +295,30 @@ class AuthController {
         }).save().then((data2) => {
           console.log("verify email token: ", data2)
           const url = `${process.env.FE_URL}/xac-nhan-email/${username}/${data2.token}`;
-          SendEmail.verifyEmail(mail, "Verify Email", url).then((data)=>{
+          SendEmail.verifyEmail(mail, "Verify Email", url).then((data) => {
             res.status(200).send(
               JSON.stringify({
-                message: "Verify link has sent to your email" 
+                message: "Verify link has sent to your email"
               })
             )
           })
-          .catch((error)=>{
-            res.status(400).send(
-              JSON.stringify({
-                message: error
-              })
-            );
-          })
-      
+            .catch((error) => {
+              res.status(400).send(
+                JSON.stringify({
+                  message: error
+                })
+              );
+            })
+
         })
-        .catch((error)=>{
-          res.status(400).send(error);
-        });
+          .catch((error) => {
+            res.status(400).send(error);
+          });
       })
-      .catch((error)=>{
+      .catch((error) => {
         res.status(400).send(error);
       })
-      }
+  }
 
 }
 
