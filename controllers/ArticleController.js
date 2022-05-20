@@ -38,10 +38,10 @@ class ArticleController {
             }
             var isFindUser = false;
             for(var j = 0; j < userData.length; j++){
-                if(dataArticle[i].userID = userData[i]._id){
+                if(dataArticle[i].userID == userData[j]._id){
                     isFindUser = true;
-                    currentData.username = userData[i].username,
-                    currentData.avatar = userData[i].avatar;
+                    currentData.username = userData[j].username,
+                    currentData.avatar = userData[j].avatar;
                     break;
                 }
             }
@@ -77,11 +77,36 @@ class ArticleController {
             imgUrl: req.body.imgUrl,
             comments: req.body.comments,
         })
+
+        var userData;
+        await User.find().exec()
+        .then((data) => {  
+            userData = data;
+        })
+        .catch((error) => {
+            res.status(404).send(error);
+        })
+
+        var username = "";
+        var userAvatar = "";
+
+        for(var j = 0; j < userData.length; j++){
+            if(newArticle.userID == userData[j]._id){
+                username = userData[j].username,
+                userAvatar = userData[j].avatar;
+                break;
+            }
+        }
+
         newArticle.save()
         .then((data) =>{
             res.status(200).send({
                 success: true,
-                data: data,
+                data: {
+                    ...data._doc,
+                    username: username,
+                    avatar:userAvatar,
+                },
             });
         })
         .catch((error)=>{
