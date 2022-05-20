@@ -1,6 +1,6 @@
 const Article = require("../models/article");
 const User = require("../models/users");
-
+var mongoose = require('mongoose');
 class ArticleController {
     getAllArticles = async (req, res) => {
         var dataArticle;
@@ -12,23 +12,54 @@ class ArticleController {
             res.status(404).send(error);
         })
 
-        console.log("dataArticle[0].userID", dataArticle[0].userID); 
-        var newI = await User.findOne({_id: dataArticle[0].userID});
-        if(newI!=null) {
-            console.log("find", newI);
-        } 
-        else console.log("non");
+        // console.log("dataArticle[0].userID", dataArticle[0].userID); 
+        // var newI = await User.findOne({_id: dataArticle[0].userID});
+        // if(newI!=null) {
+        //     console.log("find", newI);
+        // } 
+        // else console.log("non");
 
-        var summaryData = [
-            {
-                userID : dataArticle[0].userID,
-                content: dataArticle[0].content,
-                imgUrl: dataArticle[0].imgUrl,
-                comments : dataArticle[0].comments,
-                username : !newI.name ? "Không có" : newI.name,
-                avatar : !newI.avatar ? "https://img-9gag-fun.9cache.com/photo/axBB4pW_460s.jpg" : newI.avatar,
+        var userData;
+        await User.find().exec()
+        .then((data) => {  
+            userData = data;
+        })
+        .catch((error) => {
+            res.status(404).send(error);
+        })
+
+        var summaryData = [];
+        for(var i = 0; i < dataArticle.length; i++){
+            var currentData = {
+                userID : dataArticle[i].userID,
+                content: dataArticle[i].content,
+                imgUrl: dataArticle[i].imgUrl,
+                comments : dataArticle[i].comments,
             }
-        ]
+            var isFindUser = false;
+            for(var j = 0; j < userData.length; j++){
+                if(dataArticle[i].userID = userData[i]._id){
+                    isFindUser = true;
+                    currentData.username = userData[i].username,
+                    currentData.avatar = userData[i].avatar;
+                    break;
+                }
+            }
+            if(isFindUser){
+                summaryData.push(currentData);
+            }
+        }
+
+        // var summaryData = [
+        //     {
+        //         userID : dataArticle[0].userID,
+        //         content: dataArticle[0].content,
+        //         imgUrl: dataArticle[0].imgUrl,
+        //         comments : dataArticle[0].comments,
+        //         username : !newI.name ? "Không có" : newI.name,
+        //         avatar : !newI.avatar ? "https://img-9gag-fun.9cache.com/photo/axBB4pW_460s.jpg" : newI.avatar,
+        //     }
+        // ]
 
         res.status(200).send(
             JSON.stringify({
@@ -36,6 +67,29 @@ class ArticleController {
             })
         )
     }   
+
+    addArticles = async (req, res) => {
+        console.log("req.body", req.body);
+        var newArticle = new Article({    
+            _id: mongoose.Types.ObjectId(),
+            userID: req.body.userID,
+            content: req.body.content,
+            imgUrl: req.body.imgUrl,
+            comments: req.body.comments,
+        })
+        newArticle.save()
+        .then((data) =>{
+            res.status(200).send({
+                success: true,
+                data: data,
+            });
+        })
+        .catch((error)=>{
+            console.log("error", error)
+            res.status(404).send({success:false});
+        })
+        // res.status(200).send({run:true});
+    }
 }
 
 module.exports = new ArticleController();
