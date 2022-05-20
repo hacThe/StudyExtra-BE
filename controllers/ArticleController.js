@@ -120,6 +120,22 @@ class ArticleController {
         })
         // res.status(200).send({run:true});
     }
+
+    deleteArticles = async (req, res) => {
+        console.log("req.body", req.body);
+        Article.findOneAndDelete({_id: req.body._id})
+        .then((data) => {
+            res.status(200).send(
+                JSON.stringify({
+                    data,
+                })
+            );
+        })
+        .catch((err) => {
+            res.status(404).send({run: false, err: err});
+        });
+        // res.status(200).send({run:true});
+    }
 }
 
 module.exports = new ArticleController();
