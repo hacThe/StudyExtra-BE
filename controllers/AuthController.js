@@ -1,6 +1,6 @@
 const User = require("../models/users");
-const Token = require("../models/emailtoken")
-const PasswordToken = require("../models/passwordtoken")
+const Token = require("../models/emailtoken");
+const PasswordToken = require("../models/passwordtoken");
 const { JWTAuthToken } = require("../helper/JWT");
 const crypto = require("crypto");
 const SendEmail = require("../utils/sendEmail");
@@ -19,7 +19,7 @@ class AuthController {
     const role = "user";
     const mail = req.body.email;
     const emailVerified = false;
-    const avatar = '/default-avatar';
+    const avatar = "/default-avatar";
     const courseID = [];
     const gem = 0;
     const birthday = req.body.birthday;
@@ -51,7 +51,7 @@ class AuthController {
             birthday,
             pointID,
             gender,
-            isLock: false
+            isLock: false,
           });
 
           newUser.save().then((data) => {
@@ -60,6 +60,8 @@ class AuthController {
                 message: "Sign up successfully",
                 token: JWTAuthToken({
                   username,
+                  userId: data._id,
+                  role: data.role,
                 }),
                 username,
                 data,
@@ -69,11 +71,13 @@ class AuthController {
             const token = new Token({
               username: username,
               token: crypto.randomBytes(32).toString("hex"),
-            }).save().then((data) => {
-              console.log("verify email token: ", data)
-              const url = `${process.env.FE_URL}/xac-nhan-email/${username}/${data.token}`;
-              SendEmail.verifyEmail(mail, "Verify Email", url);
-            });
+            })
+              .save()
+              .then((data) => {
+                console.log("verify email token: ", data);
+                const url = `${process.env.FE_URL}/xac-nhan-email/${username}/${data.token}`;
+                SendEmail.verifyEmail(mail, "Verify Email", url);
+              });
           });
         }
       })
@@ -96,18 +100,19 @@ class AuthController {
       .then((data) => {
         //check password, if password is correct then get all data and respond for client
         if (bcrypt.compareSync(password, data.password)) {
+          const { password, ...user } = data._doc;
 
-          const { password, ...user } = data._doc
-
-          res
-            .status(200)
-            .send(
-              JSON.stringify({
-                message: "Login successfully",
-                user: user,
-                token: JWTAuthToken({ username }),
-              })
-            );
+          res.status(200).send(
+            JSON.stringify({
+              message: "Login successfully",
+              user: user,
+              token: JWTAuthToken({
+                username,
+                userId: data._id,
+                role: data.role,
+              }),
+            })
+          );
         } else {
           throw new Error();
         }
@@ -134,7 +139,6 @@ class AuthController {
     );
   };
 
-
   //----------------------------------------------------verify-email-----------------------------------------------------------------------------//
   verifyEmail = async (req, res) => {
     try {
@@ -147,69 +151,74 @@ class AuthController {
       });
       if (!token) return res.status(400).send("token not found");
 
-      await User.updateOne({ username: user.username }, { emailVerified: true });
+      await User.updateOne(
+        { username: user.username },
+        { emailVerified: true }
+      );
       await token.remove();
 
       res.status(200).send({ message: "Email verified successfully" });
     } catch (error) {
-      res.status(400).send(
-        error.toString());
+      res.status(400).send(error.toString());
     }
   };
 
-
   sendVerifyCode = async (req, res) => {
     const username = req.body.username;
-    await PasswordToken.deleteMany({ username: username }).exec()
-      .then(
-        () => console.log("old tokens has deleted!")
-      )
+    await PasswordToken.deleteMany({ username: username })
+      .exec()
+      .then(() => console.log("old tokens has deleted!"))
       .catch((err) => {
         return res.status(400).send(err);
-      })
+      });
 
-    await User.findOne({ username: username }).exec()
+    await User.findOne({ username: username })
+      .exec()
       .then((data) => {
         if (!data) return res.status(400).send("user not found");
         const mail = data.mail;
         const token = new PasswordToken({
           username: username,
           token: Math.random().toString(16).substring(2, 8),
-        }).save().then((data) => {
-          console.log("forgot password token: ", data)
-          SendEmail.verifyPassword(mail, "Verify Password", data.token).then(() => {
-            res.status(200).send(
-              JSON.stringify({
-                email: mail,
-                message: "Email sent successfully"
-              })
-            )
-          }).catch((error) => {
-            return res.status(400).send(
-              JSON.stringify({
-                message: error
-              })
-            )
-          })
         })
+          .save()
+          .then((data) => {
+            console.log("forgot password token: ", data);
+            SendEmail.verifyPassword(mail, "Verify Password", data.token)
+              .then(() => {
+                res.status(200).send(
+                  JSON.stringify({
+                    email: mail,
+                    message: "Email sent successfully",
+                  })
+                );
+              })
+              .catch((error) => {
+                return res.status(400).send(
+                  JSON.stringify({
+                    message: error,
+                  })
+                );
+              });
+          })
           .catch((err) => {
             res.status(400).send(
               JSON.stringify({
                 message: "Send email failure, token has existed",
-                error: err.toString()
+                error: err.toString(),
               })
             );
-          })
+          });
       })
       .catch((err) => {
         res.status(400).send(
           JSON.stringify({
             message: "User not found",
-            error: err.toString()
+            error: err.toString(),
           })
         );
-      })
-  }
+      });
+  };
 
   verifyCode = async (req, res) => {
     const username = req.body.username;
@@ -222,10 +231,9 @@ class AuthController {
     if (!token) return res.status(400).send({ message: "Invalid code" });
 
     res.status(200).send({ message: "Valid code" });
-  }
+  };
 
   setNewPassword = async (req, res) => {
-
     try {
       const newPassword = req.body.newPassword;
       const username = req.body.username;
@@ -236,7 +244,10 @@ class AuthController {
       });
       if (!token) return res.status(400).send("Invalid code");
 
-      const user = await User.updateOne({ username: username }, { password: bcrypt.hashSync(newPassword, saltRounds) }).exec()
+      const user = await User.updateOne(
+        { username: username },
+        { password: bcrypt.hashSync(newPassword, saltRounds) }
+      ).exec();
       if (user) {
         // await token.remove();
         return res.status(200).send({ message: "Update successfully" });
@@ -245,83 +256,86 @@ class AuthController {
     } catch (error) {
       return res.status(400).send({ message: "Update failure" });
     }
-
-  }
+  };
 
   resetPassword = async (req, res) => {
+    const { oldPassword, newPassword } = req.body;
+    const username = res.locals.data.username;
 
-    const { oldPassword, newPassword } = req.body
-    const username = res.locals.data.username
-
-    User.findOne({ username: username }).exec()
+    User.findOne({ username: username })
+      .exec()
       .then((data) => {
         if (!data) return res.status(400).send("User not found");
-        if (!bcrypt.compareSync(oldPassword, data.password)) return res.status(400).send("Password is not correct");
-        User.updateOne({ username: username }, {password: bcrypt.hashSync(newPassword, saltRounds)}).exec()
+        if (!bcrypt.compareSync(oldPassword, data.password))
+          return res.status(400).send("Password is not correct");
+        User.updateOne(
+          { username: username },
+          { password: bcrypt.hashSync(newPassword, saltRounds) }
+        )
+          .exec()
           .then(() => {
             res.status(200).send(
               JSON.stringify({
-                message: "success"
+                message: "success",
               })
-            )
+            );
           })
           .catch((err) => {
             res.status(400).send(err);
-          })
+          });
       })
       .catch((error) => {
         res.status(400).send(error);
-      })
-  }
+      });
+  };
 
   resendVerifyEmail = async (req, res) => {
-
     const username = res.locals.data.username;
     // const username = "tanthanh1"
-    await Token.deleteMany({ username: username }).exec()
-      .then(
-        () => console.log("Old email tokens has deleted!")
-      )
+    await Token.deleteMany({ username: username })
+      .exec()
+      .then(() => console.log("Old email tokens has deleted!"))
       .catch((err) => {
         console.log(err);
-      })
+      });
 
-    await User.findOne({ username: username }).exec()
+    await User.findOne({ username: username })
+      .exec()
       .then((data) => {
         if (!data) return res.status(400).send("user not found");
         const mail = data.mail;
         const token = new Token({
           username: username,
           token: crypto.randomBytes(32).toString("hex"),
-        }).save().then((data2) => {
-          console.log("verify email token: ", data2)
-          const url = `${process.env.FE_URL}/xac-nhan-email/${username}/${data2.token}`;
-          SendEmail.verifyEmail(mail, "Verify Email", url).then((data) => {
-            res.status(200).send(
-              JSON.stringify({
-                message: "Verify link has sent to your email"
-              })
-            )
-          })
-            .catch((error) => {
-              res.status(400).send(
-                JSON.stringify({
-                  message: error
-                })
-              );
-            })
-
         })
+          .save()
+          .then((data2) => {
+            console.log("verify email token: ", data2);
+            const url = `${process.env.FE_URL}/xac-nhan-email/${username}/${data2.token}`;
+            SendEmail.verifyEmail(mail, "Verify Email", url)
+              .then((data) => {
+                res.status(200).send(
+                  JSON.stringify({
+                    message: "Verify link has sent to your email",
+                  })
+                );
+              })
+              .catch((error) => {
+                res.status(400).send(
+                  JSON.stringify({
+                    message: error,
+                  })
+                );
+              });
+          })
           .catch((error) => {
             res.status(400).send(error);
           });
       })
       .catch((error) => {
         res.status(400).send(error);
-      })
-  }
-
+      });
+  };
 }
-
 
 module.exports = new AuthController();

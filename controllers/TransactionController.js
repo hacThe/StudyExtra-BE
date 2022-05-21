@@ -24,7 +24,7 @@ class TransactionController {
         amount: amount,
         balance: balance,
         status: "waiting",
-        type: "deposit",
+        type: "increase",
         context: context,
         note: "Nạp GEM vào tài khoản",
       });

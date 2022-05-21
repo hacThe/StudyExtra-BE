@@ -1,38 +1,37 @@
-const { ObjectId } = require('mongodb');
-const mongoose = require ('mongoose')
+const { ObjectId } = require("mongodb");
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const TransactionSchema = new Schema ({
+const TransactionSchema = new Schema(
+  {
     userID: { type: Schema.Types.ObjectId, ref: "users" },
     username: {
-        type: String,
-        required: true,
+      type: String,
     },
     amount: {
-        type: Number,
-        required: true,
+      type: Number,
+      required: true,
     },
     balance: {
-        type: Number,
-        required: true,
+      type: Number,
     },
     status: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
     type: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
-    context:{
-        transactionNumber: String,
-        bankSend: String,
-        bankReceive: String,
+    context: {
+      transactionNumber: String,
+      bankSend: String,
+      bankReceive: String,
     },
-    note: String
-},
-    { timestamps: true }
+    note: String,
+  },
+  { timestamps: true }
 );
 
-const Transaction = mongoose.model('transactions', TransactionSchema);
+const Transaction = mongoose.model("transactions", TransactionSchema);
 module.exports = Transaction;

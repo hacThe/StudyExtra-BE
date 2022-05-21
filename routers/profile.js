@@ -7,6 +7,7 @@ const AccountController = require('../controllers/AccountController');
 
 router.get('/getUserCourses', AuthMiddleware, AccountController.getUserCourses);
 router.post('/upLoadAvatar',AuthMiddleware, AccountController.uploadAvatar);
+router.post('/updateGem' ,AuthMiddleware , AccountController.updateGem);
 router.post('/updateProfile' ,AuthMiddleware , AccountController.updateProfile);
 
 

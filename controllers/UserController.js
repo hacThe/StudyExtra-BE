@@ -6,7 +6,7 @@ const User = require("../models/users");
 class userController {
   getAllUser = async (req, res) => {
     User.find()
-    .populate('transactions')
+      .populate("transactions")
       .exec()
       .then((data) => {
         res.status(200).send(
@@ -21,7 +21,24 @@ class userController {
   };
 
   getUser = async (req, res) => {
-    User.findById(req.params.id)
+    const id = req.params.id || res.locals.data.userId;
+    User.findById(id)
+      .then((data) => {
+        res.status(200).send(
+          JSON.stringify({
+            data: data,
+          })
+        );
+      })
+      .catch((error) => {
+        res.status(404).send(error.toString());
+      });
+  };
+
+  getCurrentUser = async (req, res) => {
+    const id =  res.locals.data.userId
+    
+    User.findById(id)
       .then((data) => {
         res.status(200).send(
           JSON.stringify({
