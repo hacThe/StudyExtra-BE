@@ -150,6 +150,7 @@ class TransactionController {
               } else {
                 user.gem = transaction.amount;
               }
+              user.transactions.push(transaction._id)
               user.save().then((data) => {
                 Transaction.find({ status: "waiting" })
                   .populate("userID")

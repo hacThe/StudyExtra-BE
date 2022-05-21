@@ -22,7 +22,7 @@ class userController {
 
   getUser = async (req, res) => {
     const id = req.params.id || res.locals.data.userId;
-    User.findById(id)
+    User.findById(id).populate('transactions').exec()
       .then((data) => {
         res.status(200).send(
           JSON.stringify({
@@ -38,7 +38,7 @@ class userController {
   getCurrentUser = async (req, res) => {
     const id =  res.locals.data.userId
     
-    User.findById(id)
+    User.findById(id).populate('transactions').exec()
       .then((data) => {
         res.status(200).send(
           JSON.stringify({
