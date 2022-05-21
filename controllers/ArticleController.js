@@ -125,23 +125,48 @@ class ArticleController {
         console.log("req.body", req.body);
 
 
-        Article.findOneAndUpdate({_id: req.body._id}, 
+        await Article.findOneAndUpdate({_id: req.body._id}, 
             {
                 content: req.body.content,
                 imgUrl: req.body.imgUrl,
             }
         )
         .then((data) => {
-            res.status(200).send(
-                JSON.stringify({
-                    data,
-                })
-            );
+            
         })
         .catch((err) => {
             res.status(404).send({run: false, err: err});
         });
 
+        var newI = await Article.findById(req.body._id);
+        // if(!newI)
+        //     res.status(404).send({find: false});
+        
+        console.log("newI", newI)
+        var dataReturn = {...newI._doc};
+        // var isFind = false;
+        // var userData;
+
+        await User.findById(newI.userID).exec()
+            .then((data) => {  
+                // userData = data;
+                // isFind = true;
+                console.log("data",data);
+                dataReturn.username = data.username;
+                dataReturn.name = data.name;
+                dataReturn.avatar = data.avatar;
+                res.status(200).send(
+                    JSON.stringify({
+                        data: dataReturn,
+                    })
+                );
+            })
+            .catch((error) => {
+                res.status(404).send(error);
+            })
+        
+            
+        // console.log("userData", userData)
         // res.status(200).send({run:true});
 
     }
