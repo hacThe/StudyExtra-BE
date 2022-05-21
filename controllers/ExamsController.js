@@ -1,8 +1,142 @@
 const Questions = require("../models/question");
 const Attention = require("../models/attention");
-
+const TestExam = require('../models/testExam');
 
 class ExamsController {
+
+    saveExam = async (req, res) => {
+        try {
+            const { id, nameExam, questionPoint, listQuestion, time, typeCategory } = req.body
+            TestExam.findByIdAndUpdate(id,
+                {
+                    nameExam,
+                    questionPoint,
+                    listQuestion,
+                    time,
+                    typeCategory
+                },
+                (err, docs) => {
+                    if (err) {
+                        res.status(401).send(JSON.stringify({
+                            message: "Get failed"
+                        }))
+                    } else {
+                        res.status(201).send(JSON.stringify({
+                            message: 'Save success',
+                            data: docs,
+                        }))
+                    }
+                })
+        } catch {
+            res.status(401).send(JSON.stringify({
+                message: "Error system"
+            }))
+        }
+    }
+
+    deleteExam = async (req, res) => {
+        try {
+            const { id } = req.body
+            TestExam.findByIdAndDelete(id, (err, docs) => {
+                if (err) {
+                    res.status(401).send(JSON.stringify({
+                        message: "Get failed"
+                    }))
+                } else {
+                    res.status(201).send(JSON.stringify({
+                        message: 'Delete success',
+                        data: docs,
+                    }))
+                }
+            })
+        } catch {
+            res.status(401).send(JSON.stringify({
+                message: "Error system"
+            }))
+        }
+    }
+
+    getExamEdit = async (req, res) => {
+        try {
+            const { id } = req.params
+            TestExam.findById(id, (err, docs) => {
+                if (err) {
+                    res.status(401).send(JSON.stringify({
+                        message: "Get failed"
+                    }))
+                } else {
+                    res.status(201).send(JSON.stringify({
+                        message: 'Get success',
+                        data: docs,
+                    }))
+                }
+            })
+
+        } catch (err) {
+            res.status(401).send(JSON.stringify({
+                message: "Error system"
+            }))
+        }
+    }
+
+    getAllTestExam = async (req, res) => {
+        try {
+            await TestExam.find().exec()
+                .then(result => {
+                    res.status(201).send(JSON.stringify({
+                        message: 'Get success',
+                        data: result
+                    }))
+                })
+                .catch(err => {
+                    res.status(401).send(JSON.stringify({
+                        message: "Get failed"
+                    }))
+                })
+        } catch (err) {
+            res.status(401).send(JSON.stringify({
+                message: "Error system"
+            }))
+        }
+    }
+
+    addNewExam = async (req, res) => {
+        try {
+            const { nameExam, questionPoint, listQuestion, time, typeCategory } = req.body
+            console.log(req.body)
+            const newTestExam = new TestExam({
+                nameExam,
+                questionPoint,
+                listQuestion,
+                time,
+                typeCategory
+            })
+
+            newTestExam.save()
+                .then(result => {
+                    if (result) {
+                        res.status(201).send(JSON.stringify({
+                            message: 'Send succes',
+                            data: result
+                        }))
+                    } else {
+                        res.status(401).send(JSON.stringify({
+                            message: "Save failed"
+                        }))
+                    }
+                })
+                .catch(err => {
+                    res.status(401).send(JSON.stringify({
+                        message: "Save failed"
+                    }))
+                })
+        } catch (err) {
+            res.status(401).send(JSON.stringify({
+                message: "Error system"
+            }))
+        }
+    }
+
     getAllExams = async (req, res) => {
 
     }
