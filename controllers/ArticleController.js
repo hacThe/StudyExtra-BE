@@ -52,16 +52,6 @@ class ArticleController {
             }
         }
 
-        // var summaryData = [
-        //     {
-        //         userID : dataArticle[0].userID,
-        //         content: dataArticle[0].content,
-        //         imgUrl: dataArticle[0].imgUrl,
-        //         comments : dataArticle[0].comments,
-        //         username : !newI.name ? "Không có" : newI.name,
-        //         avatar : !newI.avatar ? "https://img-9gag-fun.9cache.com/photo/axBB4pW_460s.jpg" : newI.avatar,
-        //     }
-        // ]
 
         res.status(200).send(
             JSON.stringify({
@@ -185,6 +175,104 @@ class ArticleController {
             res.status(404).send({run: false, err: err});
         });
         // res.status(200).send({run:true});
+    }
+
+    addBigComment = async (req, res) => {
+        console.log("req.body", req.body);
+
+
+        var currentArticle;
+        await Article.findById(req.body.postID).exec()
+        .then((data) => {  
+            currentArticle = data;
+        })
+        .catch((error) => {
+            res.status(404).send({run: false, error:error});
+        })
+        // console.log("currentArticle", currentArticle);
+        var newCommentList = [
+            ...currentArticle.comments,
+            {
+                commentID: mongoose.Types.ObjectId(),
+                userID: req.body.userID,
+                content: req.body.content,
+                type: req.body.type,
+                userTagID: req.body.userTagID,
+                imgUrl: req.body.imgUrl,
+                replyComment: [],
+            }
+        ]
+        // add new article comment
+        await Article.findOneAndUpdate({_id: req.body.postID}, 
+            {
+                comments: newCommentList,
+            }
+        )
+        .then((dataRes) => {
+            
+        })
+        .catch((err) => {
+            res.status(404).send({run: false, err: err});
+        });
+
+        console.log("Thực hiện xong việc add cmt rồi");
+
+        // Lấy lại data của article rồi bắt đầu join các bảng để trả về cmt mới nhất cho người dùng
+        var dataArticle;
+        await Article.find().exec()
+        .then((data) => {  
+            dataArticle = data;
+        })
+        .catch((error) => {
+            res.status(404).send(error);
+        })
+
+        // console.log("dataArticle[0].userID", dataArticle[0].userID); 
+        // var newI = await User.findOne({_id: dataArticle[0].userID});
+        // if(newI!=null) {
+        //     console.log("find", newI);
+        // } 
+        // else console.log("non");
+
+        var userData;
+        await User.find().exec()
+        .then((data) => {  
+            userData = data;
+        })
+        .catch((error) => {
+            res.status(404).send(error);
+        })
+
+        var summaryData = [];
+        for(var i = 0; i < dataArticle.length; i++){
+            var currentData = {
+                ...dataArticle[i]._doc,
+                userID : dataArticle[i].userID,
+                content: dataArticle[i].content,
+                imgUrl: dataArticle[i].imgUrl,
+                comments : dataArticle[i].comments,
+            }
+            var isFindUser = false;
+            for(var j = 0; j < userData.length; j++){
+                if(dataArticle[i].userID == userData[j]._id){
+                    isFindUser = true;
+                    currentData.username = userData[j].username,
+                    currentData.avatar = userData[j].avatar;
+                    currentData.name = userData[j].name;
+                    break;
+                }
+            }
+            if(isFindUser){
+                summaryData.push(currentData);
+            }
+        }
+
+
+        res.status(200).send(
+            JSON.stringify({
+                data: summaryData
+            })
+        )
     }
 }
 

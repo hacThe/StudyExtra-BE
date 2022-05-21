@@ -8,4 +8,6 @@ router.post('/', ArticleController.addArticles);
 router.put('/', ArticleController.editArticle);
 router.delete('/', ArticleController.deleteArticles);
 
+router.post('/add-comment', ArticleController.addBigComment);
+
 module.exports = router;
