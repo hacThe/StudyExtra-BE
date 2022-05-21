@@ -125,40 +125,104 @@ class AccountController {
   };
 
   updateGem = async (req, res) => {
-      const gem = req.body.amount;
-      const userId = req.body.userId;
-      const user  = req.body
-      console.log("up date",req.body, userId, gem)
+    const gem = req.body.amount;
+    const userId = req.body.userId;
+    const user = req.body;
+    console.log("up date", req.body, userId, gem);
 
     User.findById(userId)
       .exec()
       .then((user) => {
         const transaction = new Transaction({
-            userID: user._id,
-            username: user.username,
-            amount: Math.abs(parseInt(gem) - parseInt(user.gem)),
-            balance: gem,
-            status: "complete",
-            type: (parseInt(gem) - parseInt(user.gem)) > 0 ? "increase" : "reduction",
-            note: "Chỉnh sửa bởi Admin"
+          userID: user._id,
+          username: user.username,
+          amount: Math.abs(parseInt(gem) - parseInt(user.gem)),
+          balance: gem,
+          status: "complete",
+          type:
+            parseInt(gem) - parseInt(user.gem) > 0 ? "increase" : "reduction",
+          note: "Chỉnh sửa bởi Admin",
         });
-        console.log(transaction, "transaction nè")
+        console.log(transaction, "transaction nè");
 
-        transaction.save().then((transaction=>{
-            user.gem = gem
-            user.transactions.push(transaction._id)
-            user.save().then((user)=>{
-                res.status(200).send(
-                    JSON.stringify({
-                        data: user
-                    })
-                )
-            })
-        }))
+        transaction.save().then((transaction) => {
+          user.gem = gem;
+          user.transactions.push(transaction._id);
+          user.save().then((user) => {
+            res.status(200).send(
+              JSON.stringify({
+                data: user,
+              })
+            );
+          });
+        });
       })
       .catch((error) => {
         res.status(404).send(error);
       });
+  };
+
+  userBuyCourse = async (req, res) => {
+    try {
+      console.log(req.body);
+      const courseID = req.body._id;
+      const username = req.body.username;
+
+      const user = await User.findOne({ username }).exec();
+      const course = await Course.findOne({ courseID }).exec();
+      // Check đã mua khóa học hay chưa
+      user.courseID.forEach((value) => {
+        if (String(value) === String(course._id)) {
+          res.status(200).send(
+            JSON.stringify({
+              status: 0,
+              message: "Bạn đã mua khóa học",
+            })
+          );
+        }
+      });
+
+      // Check user và courses tồn tại để thêm khóa học vào database
+      if (user && course) {
+        user.courseID.push(course._id);
+        user
+          .save()
+          .then((result) => {
+            if (result) {
+              res.status(200).send(
+                JSON.stringify({
+                  status: 1,
+                  message: "Mua khóa học thành công",
+                  data: result,
+                })
+              );
+            }
+            console.log(result);
+          })
+          .catch((err) => {
+            res.status(401).send(
+              JSON.stringify({
+                status: 0,
+                message: "Lỗi hệ thống",
+              })
+            );
+          });
+      }
+
+      // await User.findOne({ username })
+      //     .populate("courses")
+      //     .exec()
+      //     .then(result => {
+      //         console.log(result)
+      //     })
+    } catch (err) {
+      res.status(401).send(
+        JSON.stringify({
+          status: 0,
+          message: "Lỗi hệ thống",
+        })
+      );
+    }
   };
 }
 

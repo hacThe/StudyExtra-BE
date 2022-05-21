@@ -57,6 +57,8 @@ class CoursesController {
       });
   };
 
+  
+
   getOne = async (req, res) => {
     const id = req.params.id;
     Course.findOne({ courseId: id })
