@@ -13,7 +13,7 @@ const CoursesSchema = new Schema(
     chapters: [{ type: Schema.Types.ObjectId, ref: "chapters" }],
     categories: Array,
     rating: Array,
-    studentIds: Array,
+    studentIds: [{ type: Schema.Types.ObjectId, ref: "users" }],
     requirements: Array,
     isHide: Boolean,
   },

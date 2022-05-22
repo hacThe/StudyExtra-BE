@@ -179,34 +179,59 @@ class AccountController {
               message: "Bạn đã mua khóa học",
             })
           );
+
+          return;
         }
       });
 
       // Check user và courses tồn tại để thêm khóa học vào database
       if (user && course) {
+        if (user.balance < course.price) {
+          res.status(200).send(
+            JSON.stringify({
+              status: 0,
+              message: "Vui lòng nạp thêm GEM để tiếp tục sử dụng dịch vụ",
+            })
+          );
+
+          return;
+        }
         user.courseID.push(course._id);
-        user
-          .save()
-          .then((result) => {
-            if (result) {
+        user.gem = user.gem - course.price;
+
+        const transaction = new Transaction({
+          userID: user._id,
+          username: user.username,
+          amount: course.price,
+          balance: user.gem,
+          status: "complete",
+          type: "reduction",
+          note: `Mua khóa học: ${course.name}`,
+        });
+        console.log(transaction, "transaction nè");
+
+        transaction.save().then((transaction) => {
+          user.transactions.push(transaction._id);
+          user
+            .save()
+            .then((user) => {
               res.status(200).send(
                 JSON.stringify({
                   status: 1,
                   message: "Mua khóa học thành công",
-                  data: result,
+                  data: course,
                 })
               );
-            }
-            console.log(result);
-          })
-          .catch((err) => {
-            res.status(401).send(
-              JSON.stringify({
-                status: 0,
-                message: "Lỗi hệ thống",
-              })
-            );
-          });
+            })
+            .catch((err) => {
+              res.status(401).send(
+                JSON.stringify({
+                  status: 0,
+                  message: "Lỗi hệ thống",
+                })
+              );
+            });
+        });
       }
 
       // await User.findOne({ username })

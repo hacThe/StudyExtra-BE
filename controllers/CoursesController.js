@@ -303,6 +303,7 @@ class CoursesController {
       .then((data) => {
         if (data) {
           Lesson.findOne({
+            chapterId: req.params.id,
             name: req.body.name,
           })
             .exec()
