@@ -14,4 +14,6 @@ router.post('/comment/hide', ArticleController.hideBigComment);
 router.post('/comment/show', ArticleController.showBigComment);
 
 router.post('/interaction', ArticleController.interactArticle);
+router.delete('/interaction', ArticleController.unlikeArticle);
+
 module.exports = router;
