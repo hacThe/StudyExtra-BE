@@ -1,6 +1,21 @@
 const Article = require("../models/article");
 const User = require("../models/users");
 var mongoose = require('mongoose');
+
+const refineBigComments = async(comments, userData) => {
+
+    console.log(userData);
+    // for(var i = 0; i< userData.lenth; i++){
+    //     console.log("userData[i]", userData[i]);
+    // }
+    // var res = [];
+    // for(comment in comments){
+    //     for(userData in userData)
+    // }
+
+    return comments;
+}
+
 class ArticleController {
     getAllArticles = async (req, res) => {
         var dataArticle;
@@ -21,15 +36,41 @@ class ArticleController {
             res.status(404).send(error);
         })
 
+        // console.log("userData", userData)
+
         var summaryData = [];
         for(var i = 0; i < dataArticle.length; i++){
+            var currentCmt = dataArticle[i].comments;
+            console.log("currentCmt", currentCmt.length);
+            var refinedCmt = [];
+            for(var k = 0; k < currentCmt.length; k++){
+                var findCmtUser = false;
+                console.log("Chạy ở vòng k");
+                for(var j = 0; j < userData.length; j++){
+                    console.log(userData[j]._id.toString(),currentCmt[k].userID);
+                    if(userData[j]._id.toString() == currentCmt[k].userID){
+                        console.log("tìm thấy rồi")
+                        currentCmt[k].username = userData[j].username,
+                        currentCmt[k].name = userData[j].name,
+                        currentCmt[k].userAvatar = userData[j].avatar,
+                        findCmtUser = true;
+                        break;
+                    }
+                }
+                if(findCmtUser){
+                    refinedCmt.push(currentCmt[k]);
+                }
+            }
+            
             var currentData = {
                 ...dataArticle[i]._doc,
                 userID : dataArticle[i].userID,
                 content: dataArticle[i].content,
                 imgUrl: dataArticle[i].imgUrl,
-                comments : dataArticle[i].comments,
+                comments : refinedCmt,
             }
+            
+
             var isFindUser = false;
             for(var j = 0; j < userData.length; j++){
                 if(dataArticle[i].userID == userData[j]._id){
@@ -193,6 +234,7 @@ class ArticleController {
                 userTagID: req.body.userTagID,
                 imgUrl: req.body.imgUrl,
                 replyComment: [],
+                isHidden: true,
             }
         ]
         // add new article comment
@@ -229,15 +271,41 @@ class ArticleController {
             res.status(404).send(error);
         })
 
+        // console.log("userData", userData)
+
         var summaryData = [];
         for(var i = 0; i < dataArticle.length; i++){
+            var currentCmt = dataArticle[i].comments;
+            console.log("currentCmt", currentCmt.length);
+            var refinedCmt = [];
+            for(var k = 0; k < currentCmt.length; k++){
+                var findCmtUser = false;
+                console.log("Chạy ở vòng k");
+                for(var j = 0; j < userData.length; j++){
+                    console.log(userData[j]._id.toString(),currentCmt[k].userID);
+                    if(userData[j]._id.toString() == currentCmt[k].userID){
+                        console.log("tìm thấy rồi")
+                        currentCmt[k].username = userData[j].username,
+                        currentCmt[k].name = userData[j].name,
+                        currentCmt[k].userAvatar = userData[j].avatar,
+                        findCmtUser = true;
+                        break;
+                    }
+                }
+                if(findCmtUser){
+                    refinedCmt.push(currentCmt[k]);
+                }
+            }
+            
             var currentData = {
                 ...dataArticle[i]._doc,
                 userID : dataArticle[i].userID,
                 content: dataArticle[i].content,
                 imgUrl: dataArticle[i].imgUrl,
-                comments : dataArticle[i].comments,
+                comments : refinedCmt,
             }
+            
+
             var isFindUser = false;
             for(var j = 0; j < userData.length; j++){
                 if(dataArticle[i].userID == userData[j]._id){
@@ -323,15 +391,41 @@ class ArticleController {
             res.status(404).send(error);
         })
 
+        // console.log("userData", userData)
+
         var summaryData = [];
         for(var i = 0; i < dataArticle.length; i++){
+            var currentCmt = dataArticle[i].comments;
+            console.log("currentCmt", currentCmt.length);
+            var refinedCmt = [];
+            for(var k = 0; k < currentCmt.length; k++){
+                var findCmtUser = false;
+                console.log("Chạy ở vòng k");
+                for(var j = 0; j < userData.length; j++){
+                    console.log(userData[j]._id.toString(),currentCmt[k].userID);
+                    if(userData[j]._id.toString() == currentCmt[k].userID){
+                        console.log("tìm thấy rồi")
+                        currentCmt[k].username = userData[j].username,
+                        currentCmt[k].name = userData[j].name,
+                        currentCmt[k].userAvatar = userData[j].avatar,
+                        findCmtUser = true;
+                        break;
+                    }
+                }
+                if(findCmtUser){
+                    refinedCmt.push(currentCmt[k]);
+                }
+            }
+            
             var currentData = {
                 ...dataArticle[i]._doc,
                 userID : dataArticle[i].userID,
                 content: dataArticle[i].content,
                 imgUrl: dataArticle[i].imgUrl,
-                comments : dataArticle[i].comments,
+                comments : refinedCmt,
             }
+            
+
             var isFindUser = false;
             for(var j = 0; j < userData.length; j++){
                 if(dataArticle[i].userID == userData[j]._id){
