@@ -234,7 +234,7 @@ class ArticleController {
                 userTagID: req.body.userTagID,
                 imgUrl: req.body.imgUrl,
                 replyComment: [],
-                isHidden: true,
+                isHidden: false,
             }
         ]
         // add new article comment
