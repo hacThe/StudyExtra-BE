@@ -12,13 +12,6 @@ class ArticleController {
             res.status(404).send(error);
         })
 
-        // console.log("dataArticle[0].userID", dataArticle[0].userID); 
-        // var newI = await User.findOne({_id: dataArticle[0].userID});
-        // if(newI!=null) {
-        //     console.log("find", newI);
-        // } 
-        // else console.log("non");
-
         var userData;
         await User.find().exec()
         .then((data) => {  
@@ -215,7 +208,7 @@ class ArticleController {
             res.status(404).send({run: false, err: err});
         });
 
-        console.log("Thực hiện xong việc add cmt rồi");
+        // console.log("Thực hiện xong việc add cmt rồi");
 
         // Lấy lại data của article rồi bắt đầu join các bảng để trả về cmt mới nhất cho người dùng
         var dataArticle;
@@ -227,12 +220,99 @@ class ArticleController {
             res.status(404).send(error);
         })
 
-        // console.log("dataArticle[0].userID", dataArticle[0].userID); 
-        // var newI = await User.findOne({_id: dataArticle[0].userID});
-        // if(newI!=null) {
-        //     console.log("find", newI);
-        // } 
-        // else console.log("non");
+        var userData;
+        await User.find().exec()
+        .then((data) => {  
+            userData = data;
+        })
+        .catch((error) => {
+            res.status(404).send(error);
+        })
+
+        var summaryData = [];
+        for(var i = 0; i < dataArticle.length; i++){
+            var currentData = {
+                ...dataArticle[i]._doc,
+                userID : dataArticle[i].userID,
+                content: dataArticle[i].content,
+                imgUrl: dataArticle[i].imgUrl,
+                comments : dataArticle[i].comments,
+            }
+            var isFindUser = false;
+            for(var j = 0; j < userData.length; j++){
+                if(dataArticle[i].userID == userData[j]._id){
+                    isFindUser = true;
+                    currentData.username = userData[j].username,
+                    currentData.avatar = userData[j].avatar;
+                    currentData.name = userData[j].name;
+                    break;
+                }
+            }
+            if(isFindUser){
+                summaryData.push(currentData);
+            }
+        }
+
+
+        res.status(200).send(
+            JSON.stringify({
+                data: summaryData
+            })
+        )
+    }
+
+    deleteBigComment = async (req, res) => {
+        console.log("req.body: ", req.body);
+        // Tìm article liên quan
+        var dataArticle;
+        await Article.findById(req.body.postID).exec()
+        .then((data)=>{
+            dataArticle = data;
+        })
+        .catch((error)=>{
+            res.status(404).send({
+                success: false,
+                findArticle: false,
+                error: error,
+            })
+            return;
+        })
+        // console.log("dataArticle", dataArticle)
+
+        // Lấy cái commentID hiện tại
+        var allComments = dataArticle.comments;
+        // var newComments = [];
+        allComments = allComments.filter(function(item) {
+            return item.commentID.toString() != req.body.commentID;
+        })
+
+        // Thay đổi và thử lấy giá trị sau khi thay đổi
+        await Article.findOneAndUpdate({_id: req.body.postID}, 
+            {
+                comments: allComments,
+            }
+        )
+        .then((dataRes) => {
+            // res.status(200).send({
+            //     run: true, 
+            //     data: dataRes
+            // });
+            // return;
+        })
+        .catch((err) => {
+            res.status(404).send({run: false, err: err});
+            return;
+        });
+
+        // Lấy tất cả các giá trị article trả về
+        var dataArticle;
+        await Article.find().exec()
+        .then((data) => {  
+            dataArticle = data;
+        })
+        .catch((error) => {
+            res.status(404).send(error);
+        })
 
         var userData;
         await User.find().exec()
