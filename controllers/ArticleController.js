@@ -2,7 +2,7 @@ const Article = require("../models/article");
 const User = require("../models/users");
 var mongoose = require('mongoose');
 
-const refineBigComments = async(comments, userData) => {
+const refineBigreactions = async(comments, userData) => {
 
     console.log(userData);
     // for(var i = 0; i< userData.lenth; i++){
@@ -41,15 +41,15 @@ class ArticleController {
         var summaryData = [];
         for(var i = 0; i < dataArticle.length; i++){
             var currentCmt = dataArticle[i].comments;
-            console.log("currentCmt", currentCmt.length);
+            // console.log("currentCmt", currentCmt.length);
             var refinedCmt = [];
             for(var k = 0; k < currentCmt.length; k++){
                 var findCmtUser = false;
-                console.log("Chạy ở vòng k");
+                // console.log("Chạy ở vòng k");
                 for(var j = 0; j < userData.length; j++){
-                    console.log(userData[j]._id.toString(),currentCmt[k].userID);
+                    // console.log(userData[j]._id.toString(),currentCmt[k].userID);
                     if(userData[j]._id.toString() == currentCmt[k].userID){
-                        console.log("tìm thấy rồi")
+                        // console.log("tìm thấy rồi")
                         currentCmt[k].username = userData[j].username,
                         currentCmt[k].name = userData[j].name,
                         currentCmt[k].userAvatar = userData[j].avatar,
@@ -102,6 +102,7 @@ class ArticleController {
             content: req.body.content,
             imgUrl: req.body.imgUrl,
             comments: req.body.comments,
+            reactions: [],
         })
 
         var userData;
@@ -224,6 +225,8 @@ class ArticleController {
             res.status(404).send({run: false, error:error});
         })
         // console.log("currentArticle", currentArticle);
+
+
         var newCommentList = [
             ...currentArticle.comments,
             {
@@ -276,15 +279,15 @@ class ArticleController {
         var summaryData = [];
         for(var i = 0; i < dataArticle.length; i++){
             var currentCmt = dataArticle[i].comments;
-            console.log("currentCmt", currentCmt.length);
+            // console.log("currentCmt", currentCmt.length);
             var refinedCmt = [];
             for(var k = 0; k < currentCmt.length; k++){
                 var findCmtUser = false;
-                console.log("Chạy ở vòng k");
+                // console.log("Chạy ở vòng k");
                 for(var j = 0; j < userData.length; j++){
-                    console.log(userData[j]._id.toString(),currentCmt[k].userID);
+                    // console.log(userData[j]._id.toString(),currentCmt[k].userID);
                     if(userData[j]._id.toString() == currentCmt[k].userID){
-                        console.log("tìm thấy rồi")
+                        // console.log("tìm thấy rồi")
                         currentCmt[k].username = userData[j].username,
                         currentCmt[k].name = userData[j].name,
                         currentCmt[k].userAvatar = userData[j].avatar,
@@ -391,9 +394,9 @@ class ArticleController {
             for(var k = 0; k < currentCmt.length; k++){
                 var findCmtUser = false;
                 for(var j = 0; j < userData.length; j++){
-                    console.log(userData[j]._id.toString(),currentCmt[k].userID);
+                    // console.log(userData[j]._id.toString(),currentCmt[k].userID);
                     if(userData[j]._id.toString() == currentCmt[k].userID){
-                        console.log("tìm thấy rồi")
+                        // console.log("tìm thấy rồi")
                         currentCmt[k].username = userData[j].username,
                         currentCmt[k].name = userData[j].name,
                         currentCmt[k].userAvatar = userData[j].avatar,
@@ -503,9 +506,9 @@ class ArticleController {
             for(var k = 0; k < currentCmt.length; k++){
                 var findCmtUser = false;
                 for(var j = 0; j < userData.length; j++){
-                    console.log(userData[j]._id.toString(),currentCmt[k].userID);
+                    // console.log(userData[j]._id.toString(),currentCmt[k].userID);
                     if(userData[j]._id.toString() == currentCmt[k].userID){
-                        console.log("tìm thấy rồi")
+                        // console.log("tìm thấy rồi")
                         currentCmt[k].username = userData[j].username,
                         currentCmt[k].name = userData[j].name,
                         currentCmt[k].userAvatar = userData[j].avatar,
@@ -617,9 +620,9 @@ class ArticleController {
             for(var k = 0; k < currentCmt.length; k++){
                 var findCmtUser = false;
                 for(var j = 0; j < userData.length; j++){
-                    console.log(userData[j]._id.toString(),currentCmt[k].userID);
+                    // console.log(userData[j]._id.toString(),currentCmt[k].userID);
                     if(userData[j]._id.toString() == currentCmt[k].userID){
-                        console.log("tìm thấy rồi")
+                        // console.log("tìm thấy rồi")
                         currentCmt[k].username = userData[j].username,
                         currentCmt[k].name = userData[j].name,
                         currentCmt[k].userAvatar = userData[j].avatar,
@@ -664,6 +667,121 @@ class ArticleController {
         )
 
         
+    }
+
+    interactArticle = async(req, res) => {
+        console.log("req.body", req.body);
+        // Lấy article hiện tại
+        var currentArticle;
+        await Article.findById(req.body.postID).exec()
+        .then((data) => {  
+            currentArticle = data;
+        })
+        .catch((error) => {
+            res.status(404).send({run: false, error:error});
+        })
+
+        // Cập nhật thêm interaction vào thôi
+        // Lấy các reaction hiện tại
+        
+        var currentReaction;
+        try{
+            currentReaction = currentArticle.reactions;
+        }
+        catch(e){
+            currentReaction = [];
+        }
+    
+        if(!currentReaction.includes(req.body.userID))
+        currentReaction.push(req.body.userID);
+
+        await Article.findOneAndUpdate({_id: req.body.postID}, 
+            {
+                reactions: currentReaction,
+            }
+        )
+        .then((dataRes) => {
+            
+        })
+        .catch((err) => {
+            res.status(404).send({run: false, err: err});
+        });
+
+        // Trả về dữ liệu tất cả các post
+        var dataArticle;
+        await Article.find().exec()
+        .then((data) => {  
+            dataArticle = data;
+        })
+        .catch((error) => {
+            res.status(404).send(error);
+        })
+
+        var userData;
+        await User.find().exec()
+        .then((data) => {  
+            userData = data;
+        })
+        .catch((error) => {
+            res.status(404).send(error);
+        })
+
+        // console.log("userData", userData)
+
+        var summaryData = [];
+        for(var i = 0; i < dataArticle.length; i++){
+            var currentCmt = dataArticle[i].comments;
+            // console.log("currentCmt", currentCmt.length);
+            var refinedCmt = [];
+            for(var k = 0; k < currentCmt.length; k++){
+                var findCmtUser = false;
+                // console.log("Chạy ở vòng k");
+                for(var j = 0; j < userData.length; j++){
+                    // console.log(userData[j]._id.toString(),currentCmt[k].userID);
+                    if(userData[j]._id.toString() == currentCmt[k].userID){
+                        // console.log("tìm thấy rồi")
+                        currentCmt[k].username = userData[j].username,
+                        currentCmt[k].name = userData[j].name,
+                        currentCmt[k].userAvatar = userData[j].avatar,
+                        findCmtUser = true;
+                        break;
+                    }
+                }
+                if(findCmtUser){
+                    refinedCmt.push(currentCmt[k]);
+                }
+            }
+            
+            var currentData = {
+                ...dataArticle[i]._doc,
+                userID : dataArticle[i].userID,
+                content: dataArticle[i].content,
+                imgUrl: dataArticle[i].imgUrl,
+                comments : refinedCmt,
+            }
+            
+
+            var isFindUser = false;
+            for(var j = 0; j < userData.length; j++){
+                if(dataArticle[i].userID == userData[j]._id){
+                    isFindUser = true;
+                    currentData.username = userData[j].username,
+                    currentData.avatar = userData[j].avatar;
+                    currentData.name = userData[j].name;
+                    break;
+                }
+            }
+            if(isFindUser){
+                summaryData.push(currentData);
+            }
+        }
+
+
+        res.status(200).send(
+            JSON.stringify({
+                data: summaryData
+            })
+        )
     }
 }
 module.exports = new ArticleController();

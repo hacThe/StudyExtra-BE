@@ -8,6 +8,9 @@ const ArticleSchema = new Schema ({
     ],
     comments: [
     ],    
+    reactions: [
+
+    ],
 },
     { timestamps: true }
 );
