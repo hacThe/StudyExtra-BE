@@ -345,11 +345,9 @@ class ArticleController {
             })
             return;
         })
-        // console.log("dataArticle", dataArticle)
 
-        // Lấy cái commentID hiện tại
+        // Lấy cái commentID hiện tại và thực hiện xoá
         var allComments = dataArticle.comments;
-        // var newComments = [];
         allComments = allComments.filter(function(item) {
             return item.commentID.toString() != req.body.commentID;
         })
@@ -361,11 +359,6 @@ class ArticleController {
             }
         )
         .then((dataRes) => {
-            // res.status(200).send({
-            //     run: true, 
-            //     data: dataRes
-            // });
-            // return;
         })
         .catch((err) => {
             res.status(404).send({run: false, err: err});
@@ -391,16 +384,12 @@ class ArticleController {
             res.status(404).send(error);
         })
 
-        // console.log("userData", userData)
-
         var summaryData = [];
         for(var i = 0; i < dataArticle.length; i++){
             var currentCmt = dataArticle[i].comments;
-            console.log("currentCmt", currentCmt.length);
             var refinedCmt = [];
             for(var k = 0; k < currentCmt.length; k++){
                 var findCmtUser = false;
-                console.log("Chạy ở vòng k");
                 for(var j = 0; j < userData.length; j++){
                     console.log(userData[j]._id.toString(),currentCmt[k].userID);
                     if(userData[j]._id.toString() == currentCmt[k].userID){
@@ -448,6 +437,233 @@ class ArticleController {
             })
         )
     }
-}
+    
+    hideBigComment = async(req, res) => {
+        console.log("req.body", req.body);
+        // Tìm article liên quan
+        var dataArticle;
+        await Article.findById(req.body.postID).exec()
+        .then((data)=>{
+            dataArticle = data;
+        })
+        .catch((error)=>{
+            res.status(404).send({
+                success: false,
+                findArticle: false,
+                error: error,
+            })
+            return;
+        })
 
+        console.log("dataArticle",dataArticle)
+        // Lấy cái commentID hiện tại
+        var allComments = dataArticle.comments;
+        for(var i = 0; i < allComments.length; i++){
+            if(allComments[i].commentID.toString() == req.body.commentID){
+                allComments[i].isHidden = true;
+            }
+        }
+
+        // Thay đổi và thử lấy giá trị sau khi thay đổi
+        await Article.findOneAndUpdate({_id: req.body.postID}, 
+            {
+                comments: allComments,
+            }
+        )
+        .then((dataRes) => {
+        })
+        .catch((err) => {
+            res.status(404).send({run: false, err: err});
+            return;
+        });
+
+         // Lấy tất cả các giá trị article trả về
+        var dataArticle;
+        await Article.find().exec()
+        .then((data) => {  
+            dataArticle = data;
+        })
+        .catch((error) => {
+            res.status(404).send(error);
+        })
+
+        var userData;
+        await User.find().exec()
+        .then((data) => {  
+            userData = data;
+        })
+        .catch((error) => {
+            res.status(404).send(error);
+        })
+
+        var summaryData = [];
+        for(var i = 0; i < dataArticle.length; i++){
+            var currentCmt = dataArticle[i].comments;
+            var refinedCmt = [];
+            for(var k = 0; k < currentCmt.length; k++){
+                var findCmtUser = false;
+                for(var j = 0; j < userData.length; j++){
+                    console.log(userData[j]._id.toString(),currentCmt[k].userID);
+                    if(userData[j]._id.toString() == currentCmt[k].userID){
+                        console.log("tìm thấy rồi")
+                        currentCmt[k].username = userData[j].username,
+                        currentCmt[k].name = userData[j].name,
+                        currentCmt[k].userAvatar = userData[j].avatar,
+                        findCmtUser = true;
+                        break;
+                    }
+                }
+                if(findCmtUser){
+                    refinedCmt.push(currentCmt[k]);
+                }
+            }
+            
+            var currentData = {
+                ...dataArticle[i]._doc,
+                userID : dataArticle[i].userID,
+                content: dataArticle[i].content,
+                imgUrl: dataArticle[i].imgUrl,
+                comments : refinedCmt,
+            }
+            
+
+            var isFindUser = false;
+            for(var j = 0; j < userData.length; j++){
+                if(dataArticle[i].userID == userData[j]._id){
+                    isFindUser = true;
+                    currentData.username = userData[j].username,
+                    currentData.avatar = userData[j].avatar;
+                    currentData.name = userData[j].name;
+                    break;
+                }
+            }
+            if(isFindUser){
+                summaryData.push(currentData);
+            }
+        }
+
+
+        res.status(200).send(
+            JSON.stringify({
+                data: summaryData
+            })
+        )
+
+        
+    }
+
+    showBigComment = async(req, res) => {
+        console.log("req.body", req.body);
+        // Tìm article liên quan
+        var dataArticle;
+        await Article.findById(req.body.postID).exec()
+        .then((data)=>{
+            dataArticle = data;
+        })
+        .catch((error)=>{
+            res.status(404).send({
+                success: false,
+                findArticle: false,
+                error: error,
+            })
+            return;
+        })
+
+        console.log("dataArticle",dataArticle)
+        // Lấy cái commentID hiện tại
+        var allComments = dataArticle.comments;
+        for(var i = 0; i < allComments.length; i++){
+            if(allComments[i].commentID.toString() == req.body.commentID){
+                allComments[i].isHidden = false;
+            }
+        }
+
+        // Thay đổi và thử lấy giá trị sau khi thay đổi
+        await Article.findOneAndUpdate({_id: req.body.postID}, 
+            {
+                comments: allComments,
+            }
+        )
+        .then((dataRes) => {
+        })
+        .catch((err) => {
+            res.status(404).send({run: false, err: err});
+            return;
+        });
+
+         // Lấy tất cả các giá trị article trả về
+        var dataArticle;
+        await Article.find().exec()
+        .then((data) => {  
+            dataArticle = data;
+        })
+        .catch((error) => {
+            res.status(404).send(error);
+        })
+
+        var userData;
+        await User.find().exec()
+        .then((data) => {  
+            userData = data;
+        })
+        .catch((error) => {
+            res.status(404).send(error);
+        })
+
+        var summaryData = [];
+        for(var i = 0; i < dataArticle.length; i++){
+            var currentCmt = dataArticle[i].comments;
+            var refinedCmt = [];
+            for(var k = 0; k < currentCmt.length; k++){
+                var findCmtUser = false;
+                for(var j = 0; j < userData.length; j++){
+                    console.log(userData[j]._id.toString(),currentCmt[k].userID);
+                    if(userData[j]._id.toString() == currentCmt[k].userID){
+                        console.log("tìm thấy rồi")
+                        currentCmt[k].username = userData[j].username,
+                        currentCmt[k].name = userData[j].name,
+                        currentCmt[k].userAvatar = userData[j].avatar,
+                        findCmtUser = true;
+                        break;
+                    }
+                }
+                if(findCmtUser){
+                    refinedCmt.push(currentCmt[k]);
+                }
+            }
+            
+            var currentData = {
+                ...dataArticle[i]._doc,
+                userID : dataArticle[i].userID,
+                content: dataArticle[i].content,
+                imgUrl: dataArticle[i].imgUrl,
+                comments : refinedCmt,
+            }
+            
+
+            var isFindUser = false;
+            for(var j = 0; j < userData.length; j++){
+                if(dataArticle[i].userID == userData[j]._id){
+                    isFindUser = true;
+                    currentData.username = userData[j].username,
+                    currentData.avatar = userData[j].avatar;
+                    currentData.name = userData[j].name;
+                    break;
+                }
+            }
+            if(isFindUser){
+                summaryData.push(currentData);
+            }
+        }
+
+
+        res.status(200).send(
+            JSON.stringify({
+                data: summaryData
+            })
+        )
+
+        
+    }
+}
 module.exports = new ArticleController();
