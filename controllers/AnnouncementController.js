@@ -1,8 +1,12 @@
 const Announcement = require("../models/announcement");
+const User = require("../models/users")
 class NotificationGenarelController {
     getAllAnnouncement = async (req, res) => {
-        Announcement.find().exec()
+        Announcement.find()
+            .populate("user")
+            .exec()
             .then((data) => {
+                console.log('thành công')
                 res.status(200).send(
                     JSON.stringify({
                         status: 200,
@@ -11,6 +15,7 @@ class NotificationGenarelController {
                 )
             })
             .catch((error) => {
+                console.log('thất bại')
                 res.status(404).send(error);
             })
     }
@@ -56,38 +61,41 @@ class NotificationGenarelController {
                 title
             }
         )
-        .then(result => {
-            if (result) {
-                res.status(200).send(
-                    JSON.stringify({
-                        status: 200,
-                        message: 'Update success!'
-                    })
-                )
-            } else {
-                res.status(200).send(
+            .then(result => {
+                if (result) {
+                    res.status(200).send(
+                        JSON.stringify({
+                            status: 200,
+                            message: 'Update success!'
+                        })
+                    )
+                } else {
+                    res.status(200).send(
+                        JSON.stringify({
+                            status: 401,
+                            message: 'Update failed!'
+                        })
+                    )
+                }
+            })
+            .catch(err => {
+                res.status(401).send(
                     JSON.stringify({
                         status: 401,
-                        message: 'Update failed!'
+                        message: 'Delete failed!'
                     })
                 )
-            }
-        })
-        .catch(err => {
-            res.status(401).send(
-                JSON.stringify({
-                    status: 401,
-                    message: 'Delete failed!'
-                })
-            )
-        })
+            })
     }
 
     createAnnouncement = async (req, res) => {
-        const { title, content } = req.body
+        const { title, content, idUser } = req.body
+        //const user = await User.findById(idUser).exec()
+        console.log(user)
         const newAnnouncement = new Announcement({
             content,
-            title
+            title,
+            user: idUser,
         })
         newAnnouncement.save()
             .then((data) => {

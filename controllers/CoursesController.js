@@ -9,6 +9,7 @@ class CoursesController {
       .populate("chapters")
       .exec()
       .then((data) => {
+        z
         res.status(200).send(
           JSON.stringify({
             data: data,
@@ -57,7 +58,7 @@ class CoursesController {
       });
   };
 
-  
+
 
   getOne = async (req, res) => {
     const id = req.params.id;
@@ -224,7 +225,7 @@ class CoursesController {
                 course.chapters.splice(req.body.index, 0, chapter._id);
               }
               course.save().then((editedCourse) => {
-                res.redirect(303,`../../courses/${editedCourse.courseId}`);
+                res.redirect(303, `../../courses/${editedCourse.courseId}`);
               });
             } else {
               res.status(500).send(JSON.stringify(err));
@@ -244,13 +245,13 @@ class CoursesController {
           if (!err) {
             course.chapters.splice(course.chapters.indexOf(id), 1);
             course.save().then((editedCourse) => {
-              res.redirect(303,`../../../courses/${editedCourse.courseId}`);
+              res.redirect(303, `../../../courses/${editedCourse.courseId}`);
             });
 
-            Lesson.deleteMany({chapterId: id}).then((data)=>{
-              console.log({data})
-            }).catch(err=>{
-              console.log({err})
+            Lesson.deleteMany({ chapterId: id }).then((data) => {
+              console.log({ data })
+            }).catch(err => {
+              console.log({ err })
             })
           } else {
             res.status(500).send(JSON.stringify(err));
@@ -263,7 +264,7 @@ class CoursesController {
   };
 
 
-  
+
   deleteLesson = async (req, res) => {
     const id = req.params.id;
     const chapterId = req.body.chapterId;
@@ -274,13 +275,13 @@ class CoursesController {
             chapter.lessons.splice(chapter.lessons.indexOf(id), 1);
             chapter.save().then((editedChapter) => {
               Course.findById(editedChapter.courseId)
-                  .then((course) => {
-                    res.redirect(303,`../../../courses/${course.courseId}`);
-                  })
-                  .catch((err) => {
-                    console.log(err, "err nè");
-                    res.status(400).send({ message: err });
-                  });
+                .then((course) => {
+                  res.redirect(303, `../../../courses/${course.courseId}`);
+                })
+                .catch((err) => {
+                  console.log(err, "err nè");
+                  res.status(400).send({ message: err });
+                });
             });
 
           } else {
@@ -382,7 +383,7 @@ class CoursesController {
               chapter.save().then((editedChapter) => {
                 Course.findById(editedChapter.courseId)
                   .then((course) => {
-                    res.redirect(303,`../../courses/${course.courseId}`);
+                    res.redirect(303, `../../courses/${course.courseId}`);
                   })
                   .catch((err) => {
                     console.log(err, "err nè");
