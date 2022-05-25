@@ -2,12 +2,20 @@ const mongoose = require ('mongoose')
 const Schema = mongoose.Schema;
 
 const ExamSchema = new Schema ({
-    _id:{
-        examId: String,
+    name: {
+        type: String,
+        required: true,
     },
-    name: String,
-    view: Number,
-    link: String,
+    courseID: String,
+    testCount: Number,
+    requirement: Array,
+    attempt: Number,
+    detail: Array,
+    description: String,
+    questionPoint: Number,
+    listQuestion: Array,
+    time: Number,//phút,
+    typeCategory: String
 },
     { timestamps: true }
 );

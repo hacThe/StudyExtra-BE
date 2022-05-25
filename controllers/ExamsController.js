@@ -1,19 +1,20 @@
 const Questions = require("../models/question");
 const Attention = require("../models/attention");
 const TestExam = require('../models/testExam');
-
+const Exam = require('../models/exam')
 class ExamsController {
 
     saveExam = async (req, res) => {
         try {
-            const { id, nameExam, questionPoint, listQuestion, time, typeCategory } = req.body
-            TestExam.findByIdAndUpdate(id,
+            const { id, name, questionPoint, listQuestion, time, typeCategory, description } = req.body
+            Exam.findByIdAndUpdate(id,
                 {
-                    nameExam,
+                    name,
                     questionPoint,
                     listQuestion,
                     time,
-                    typeCategory
+                    typeCategory,
+                    description
                 },
                 (err, docs) => {
                     if (err) {
@@ -37,7 +38,7 @@ class ExamsController {
     deleteExam = async (req, res) => {
         try {
             const { id } = req.body
-            TestExam.findByIdAndDelete(id, (err, docs) => {
+            Exam.findByIdAndDelete(id, (err, docs) => {
                 if (err) {
                     res.status(401).send(JSON.stringify({
                         message: "Get failed"
@@ -59,7 +60,7 @@ class ExamsController {
     getExamEdit = async (req, res) => {
         try {
             const { id } = req.params
-            TestExam.findById(id, (err, docs) => {
+            Exam.findById(id, (err, docs) => {
                 if (err) {
                     res.status(401).send(JSON.stringify({
                         message: "Get failed"
@@ -81,7 +82,7 @@ class ExamsController {
 
     getAllTestExam = async (req, res) => {
         try {
-            await TestExam.find().exec()
+            await Exam.find().exec()
                 .then(result => {
                     res.status(201).send(JSON.stringify({
                         message: 'Get success',
@@ -102,14 +103,15 @@ class ExamsController {
 
     addNewExam = async (req, res) => {
         try {
-            const { nameExam, questionPoint, listQuestion, time, typeCategory } = req.body
+            const { name, questionPoint, listQuestion, time, typeCategory,description } = req.body
             console.log(req.body)
-            const newTestExam = new TestExam({
-                nameExam,
+            const newTestExam = new Exam({
+                name,
                 questionPoint,
                 listQuestion,
                 time,
-                typeCategory
+                typeCategory,
+                description
             })
 
             newTestExam.save()
