@@ -1,7 +1,8 @@
 const Questions = require("../models/question");
 const Attention = require("../models/attention");
 const TestExam = require('../models/testExam');
-const Exam = require('../models/exam')
+const Exam = require('../models/exam');
+const res = require("express/lib/response");
 class ExamsController {
 
     saveExam = async (req, res) => {
@@ -88,6 +89,7 @@ class ExamsController {
                         message: 'Get success',
                         data: result
                     }))
+                    console.log("all exam: ", result)
                 })
                 .catch(err => {
                     res.status(401).send(JSON.stringify({
@@ -103,7 +105,7 @@ class ExamsController {
 
     addNewExam = async (req, res) => {
         try {
-            const { name, questionPoint, listQuestion, time, typeCategory,description } = req.body
+            const { name, questionPoint, listQuestion, time, typeCategory, description } = req.body
             console.log(req.body)
             const newTestExam = new Exam({
                 name,
@@ -139,9 +141,27 @@ class ExamsController {
         }
     }
 
-    getAllExams = async (req, res) => {
+    getExam = async (req, res) => {
+        var ObjectId = require('mongodb').ObjectId;
+        const examID = new ObjectId(req.params.id);
+        console.log("ID: ", examID);///
+        Exam.findOne({_id: examID}).exec()
+        .then((data)=>{
+            if(!data) return res.status(400).send("failure");
+            console.log(data)
 
+            return res.status(200).send(
+                JSON.stringify({
+                    data: data,
+                    message: "success"
+                })
+            )
+        })
+        .catch((err)=>{
+            res.status(400).send(err);
+        })
     }
+
     getQuestions = async (req, res) => {
         var ObjectId = require('mongodb').ObjectId;
         const questionsID = new ObjectId(req.body.questionsID);
