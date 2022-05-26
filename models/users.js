@@ -20,7 +20,7 @@ const UserSchema = new Schema ({
     examID: [{ type: Schema.Types.ObjectId, ref: "exams" }],
     gem: Number,
     birthday: Date,
-    pointID: Array,
+    pointID: Number,
     gender: String,
     isLock: Boolean, // Check xem tài khoản có đang khóa hay không
     transactions: [{ type: Schema.Types.ObjectId, ref: "transactions" }],
