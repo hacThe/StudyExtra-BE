@@ -9,7 +9,6 @@ class CoursesController {
       .populate("chapters")
       .exec()
       .then((data) => {
-        z
         res.status(200).send(
           JSON.stringify({
             data: data,

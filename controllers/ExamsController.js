@@ -1,6 +1,5 @@
 const Questions = require("../models/question");
 const Attention = require("../models/attention");
-const TestExam = require('../models/testExam');
 const Exam = require('../models/exam')
 class ExamsController {
 

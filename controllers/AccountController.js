@@ -165,73 +165,75 @@ class AccountController {
   userBuyCourse = async (req, res) => {
     try {
       console.log(req.body);
-      const courseID = req.body._id;
+      const courseID = req.body.courseId;
       const username = req.body.username;
 
+      
+
       const user = await User.findOne({ username }).exec();
-      const course = await Course.findOne({ courseID }).exec();
+      const course = await Course.findById(courseID).exec();
+
+      console.log({user,course})
       // Check đã mua khóa học hay chưa
-      user.courseID.forEach((value) => {
-        if (String(value) === String(course._id)) {
-          res.status(200).send(
-            JSON.stringify({
-              status: 0,
-              message: "Bạn đã mua khóa học",
-            })
-          );
+      if (course.studentIds.includes(user._id)) {
+        res.status(200).send(
+          JSON.stringify({
+            status: 0,
+            message: "Bạn đã mua khóa học",
+          })
+        );
+      } else {
+        // Check user và courses tồn tại để thêm khóa học vào database
+        if (user && course) {
+          if (user.balance < course.price) {
+            res.status(200).send(
+              JSON.stringify({
+                status: 0,
+                message: "Vui lòng nạp thêm GEM để tiếp tục sử dụng dịch vụ",
+              })
+            );
 
-          return;
+            return;
+          }
+          user.courseID.push(course._id);
+          course.studentIds.push(user._id);
+          await course.save()
+          user.gem = user.gem - course.price;
+
+          const transaction = new Transaction({
+            userID: user._id,
+            username: user.username,
+            amount: course.price,
+            balance: user.gem,
+            status: "complete",
+            type: "reduction",
+            note: `Mua khóa học: ${course.name}`,
+          });
+          console.log(transaction, "transaction nè");
+
+          transaction.save().then((transaction) => {
+            user.transactions.push(transaction._id);
+            user
+              .save()
+              .then((user) => {
+                res.status(200).send(
+                  JSON.stringify({
+                    status: 1,
+                    message: "Mua khóa học thành công",
+                    data: course,
+                  })
+                );
+              })
+              .catch((err) => {
+                res.status(401).send(
+                  JSON.stringify({
+                    status: 0,
+                    message: "Lỗi hệ thống",
+                  })
+                );
+              });
+          });
         }
-      });
-
-      // Check user và courses tồn tại để thêm khóa học vào database
-      if (user && course) {
-        if (user.balance < course.price) {
-          res.status(200).send(
-            JSON.stringify({
-              status: 0,
-              message: "Vui lòng nạp thêm GEM để tiếp tục sử dụng dịch vụ",
-            })
-          );
-
-          return;
-        }
-        user.courseID.push(course._id);
-        user.gem = user.gem - course.price;
-
-        const transaction = new Transaction({
-          userID: user._id,
-          username: user.username,
-          amount: course.price,
-          balance: user.gem,
-          status: "complete",
-          type: "reduction",
-          note: `Mua khóa học: ${course.name}`,
-        });
-        console.log(transaction, "transaction nè");
-
-        transaction.save().then((transaction) => {
-          user.transactions.push(transaction._id);
-          user
-            .save()
-            .then((user) => {
-              res.status(200).send(
-                JSON.stringify({
-                  status: 1,
-                  message: "Mua khóa học thành công",
-                  data: course,
-                })
-              );
-            })
-            .catch((err) => {
-              res.status(401).send(
-                JSON.stringify({
-                  status: 0,
-                  message: "Lỗi hệ thống",
-                })
-              );
-            });
-        });
       }
 
       // await User.findOne({ username })
