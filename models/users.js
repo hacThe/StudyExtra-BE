@@ -17,6 +17,7 @@ const UserSchema = new Schema ({
     emailVerified: Boolean,
     avatar: String,
     courseID: [{ type: Schema.Types.ObjectId, ref: "courses" }],
+    examID: [{ type: Schema.Types.ObjectId, ref: "exams" }],
     gem: Number,
     birthday: Date,
     pointID: Array,
