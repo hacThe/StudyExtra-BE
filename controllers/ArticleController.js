@@ -238,6 +238,7 @@ class ArticleController {
                 imgUrl: req.body.imgUrl,
                 replyComment: [],
                 isHidden: false,
+                time: req.body.time,
             }
         ]
         // add new article comment
