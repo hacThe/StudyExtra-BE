@@ -2,18 +2,55 @@ const Document = require("../models/document");
 var mongoose = require('mongoose');
 class DocumentController {
     getAllDocument = async (req, res) => {
-        console.log("nav to get document");
-        Document.find().exec()
-        .then((data) => {
-            res.status(200).send(
-                JSON.stringify({
-                    data: data
-                })
-            )
-        })
-        .catch((error) => {
-            res.status(404).send(error);
-        })
+        console.log("req.query.id", req.query.id);
+        if(typeof req.query.id == 'undefined'){
+            Document.find().exec()
+            .then((data) => {
+                res.status(200).send(
+                    JSON.stringify({
+                        success: true,
+                        data: data
+                    })
+                )
+            })
+            .catch((error) => {
+                res.status(404).send(
+                    JSON.stringify({
+                        success: false,
+                        error: error
+                    })
+                );
+            })
+        }
+        else {
+            try{
+                var newI = await Document.findById(req.query.id);
+                if(newI!=null){
+                    res.status(200).send(
+                        JSON.stringify({
+                            data: newI
+                        })
+                    )
+                }
+                else{
+                    res.status(200).send(
+                        JSON.stringify({
+                            success: true,
+                            found: false
+                        })
+                    )
+                }
+            }
+            catch(e){
+                res.status(404).send(
+                    JSON.stringify({
+                        success: false,
+                        error: e,
+                    })
+                );
+            }
+        }
+        
     }
 
     addNewDocument = async(req, res) => {
@@ -26,7 +63,7 @@ class DocumentController {
             views: req.body.views,
             link: req.body.link,
             author: req.body.author,
-            isHidden: false,
+            isHidden: req.body.isHidden,
         })
         newDocument.save()
         .then((data) =>{
@@ -41,9 +78,37 @@ class DocumentController {
         })
     }   
 
+    editDocument = async(req, res) => {
+        console.log("edit, body",req.body);
+        var newI = await Document.findOne({_id: req.body._id});
+        console.log("newI", newI);
+
+        Document.findOneAndUpdate({_id: req.body._id}, 
+            {
+                name: req.body.name,
+                typeID: req.body.typeID,
+                author: req.body.author,
+                views: req.body.views,
+                link: req.body.link,
+                isHidden: req.body.isHidden
+            }
+        ).then((data) => {
+            res.status(200).send(
+                JSON.stringify({
+                    data,
+                })
+            );   
+        })
+        .catch((err) => {
+            res.status(404).send({run: false, err: err});
+        });
+
+        // res.status(200).send({run:true});
+    }
+
     deleteDocuments = async(req, res) => {
-        console.log(req.body);
-        Document.deleteMany({_id : { $in: [...req.body.listID]}})
+        // console.log(Object.values(req.body.data));
+        Document.deleteMany({_id : { $in: [...Object.values(req.body.data)]}})
         .then((data) =>{
             res.status(200).send({
                 success: true,
