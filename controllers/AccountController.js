@@ -199,7 +199,7 @@ class AccountController {
           course.studentIds.push(user._id);
           await course.save()
           user.gem = user.gem - course.price;
-          user.pointID = user.pointID ? user.pointID + 25: 25;
+          user.point = user.point ? user.point + 25: 25;
 
           const transaction = new Transaction({
             userID: user._id,
