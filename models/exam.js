@@ -10,7 +10,7 @@ const ExamSchema = new Schema ({
     testCount: Number,
     requirement: Array,
     attempt: Number,
-    detail: Array,
+    detail: String,
     description: String,
     questionPoint: Number,
     listQuestion: Array,
