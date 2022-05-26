@@ -8,10 +8,11 @@ const ExamsController = require('../controllers/ExamsController');
 router.post('/delete-test-exam', ExamsController.deleteExam)
 router.post('/save-test-exam', ExamsController.saveExam)
 router.get('/edit/:id', ExamsController.getExamEdit)
-router.get('/getAllExams', ExamsController.getAllExams);
-router.post('/getQuestions', AuthMiddleware, ExamsController.getQuestions);
-router.post('/getResultExam', ExamsController.getResultExam);
+router.post('/checkExamRequirement', AuthMiddleware, ExamsController.checkExamRequirement)
+router.post('/postResultExam', AuthMiddleware, ExamsController.postResultExam)
+router.get('/getResultExam/:id',/*  AuthMiddleware, */ ExamsController.getResultExam)
 router.get('/getAllTestExam', ExamsController.getAllTestExam)
 router.post('/addNewExam', ExamsController.addNewExam)
+router.get('/getExam/:id', ExamsController.getExam)
 
 module.exports = router;
