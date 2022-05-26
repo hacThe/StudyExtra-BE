@@ -17,9 +17,15 @@ const UserSchema = new Schema ({
     emailVerified: Boolean,
     avatar: String,
     courseID: [{ type: Schema.Types.ObjectId, ref: "courses" }],
-    gem: Number,
+    gem: {
+        type: Number,
+        default: 0
+    },
     birthday: Date,
-    pointID: Array,
+    point: {
+        type: Number,
+        default: 0
+    },
     gender: String,
     isLock: Boolean, // Check xem tài khoản có đang khóa hay không
     transactions: [{ type: Schema.Types.ObjectId, ref: "transactions" }],

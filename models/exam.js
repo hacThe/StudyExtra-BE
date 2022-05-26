@@ -9,8 +9,11 @@ const ExamSchema = new Schema ({
     courseID: String,
     testCount: Number,
     requirement: Array,
-    attempt: Number,
-    detail: Array,
+    attempt: {
+        type: Number,
+        default: 0
+    },
+    detail: String,
     description: String,
     questionPoint: Number,
     listQuestion: Array,
