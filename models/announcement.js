@@ -13,6 +13,7 @@ const AnnouncementSchema = new Schema(
             type: String,
             required: true,
         },
+        user: { type: Schema.Types.ObjectId, ref: "users" },
         slug: { type: String, slug: 'title', unique: true },
     },
     { 

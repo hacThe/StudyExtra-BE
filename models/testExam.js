@@ -1,17 +1,12 @@
+const { ObjectId } = require('mongodb');
 const mongoose = require ('mongoose')
 const Schema = mongoose.Schema;
 
-const ExamSchema = new Schema ({
-    name: {
+const TestExamSchema = new Schema ({
+    nameExam: {
         type: String,
         required: true,
     },
-    courseID: String,
-    testCount: Number,
-    requirement: Array,
-    attempt: Number,
-    detail: Array,
-    description: String,
     questionPoint: Number,
     listQuestion: Array,
     time: Number,//phút,
@@ -20,5 +15,6 @@ const ExamSchema = new Schema ({
     { timestamps: true }
 );
 
-const Exam = mongoose.model('exam', ExamSchema);
-module.exports = Exam;
+const TestExam = mongoose.model('testExam', TestExamSchema);
+
+module.exports =  TestExam;
