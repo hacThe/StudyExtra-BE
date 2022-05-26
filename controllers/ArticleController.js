@@ -2,20 +2,6 @@ const Article = require("../models/article");
 const User = require("../models/users");
 var mongoose = require('mongoose');
 
-const refineBigreactions = async(comments, userData) => {
-
-    console.log(userData);
-    // for(var i = 0; i< userData.lenth; i++){
-    //     console.log("userData[i]", userData[i]);
-    // }
-    // var res = [];
-    // for(comment in comments){
-    //     for(userData in userData)
-    // }
-
-    return comments;
-}
-
 class ArticleController {
     getAllArticles = async (req, res) => {
         var dataArticle;
@@ -234,11 +220,11 @@ class ArticleController {
                 userID: req.body.userID,
                 content: req.body.content,
                 type: req.body.type,
-                userTagID: req.body.userTagID,
                 imgUrl: req.body.imgUrl,
                 replyComment: [],
                 isHidden: false,
                 time: req.body.time,
+                reactions: [],
             }
         ]
         // add new article comment
@@ -900,5 +886,128 @@ class ArticleController {
             })
         )
     }
+
+    interactBigComment = async(req, res) => {
+        console.log("req.body", req.body);
+
+        // Tìm article hiện tại
+        var currentArticle;
+        await Article.findById(req.body.postID).exec()
+        .then((data) => {  
+            currentArticle = data;
+        })
+        .catch((error) => {
+            res.status(404).send({run: false, error:error});
+        })
+
+
+        // find comment and add reaction the the comment 
+        var currentCmtList = currentArticle.comments;
+        console.log("1 currentCmtList", currentCmtList)
+
+
+        for(var i = 0; i < currentCmtList.length; i++){
+            if(currentCmtList[i].commentID.toString() == req.body.commentID.toString()){
+                console.log('cmt',currentCmtList[i].reactions);
+                if (!(currentCmtList[i].reactions.includes(req.body.userID))){
+                    currentCmtList[i].reactions.push(req.body.userID);
+                }
+            }
+        }
+
+        console.log("currentCmtList", currentCmtList)
+
+        // Chỉnh sửa cmt list
+        await Article.findOneAndUpdate({_id: req.body.postID}, 
+            {
+                comments: currentCmtList,
+            }
+        )
+        .then((dataRes) => {
+            
+        })
+        .catch((err) => {
+            res.status(404).send({run: false, err: err});
+        });
+
+        // console.log("Thực hiện xong việc add cmt rồi");
+
+        // Lấy lại data của article rồi bắt đầu join các bảng để trả về cmt mới nhất cho người dùng
+        var dataArticle;
+        await Article.find().exec()
+        .then((data) => {  
+            dataArticle = data;
+        })
+        .catch((error) => {
+            res.status(404).send(error);
+        })
+
+        var userData;
+        await User.find().exec()
+        .then((data) => {  
+            userData = data;
+        })
+        .catch((error) => {
+            res.status(404).send(error);
+        })
+
+        // console.log("userData", userData)
+
+        var summaryData = [];
+        for(var i = 0; i < dataArticle.length; i++){
+            var currentCmt = dataArticle[i].comments;
+            // console.log("currentCmt", currentCmt.length);
+            var refinedCmt = [];
+            for(var k = 0; k < currentCmt.length; k++){
+                var findCmtUser = false;
+                // console.log("Chạy ở vòng k");
+                for(var j = 0; j < userData.length; j++){
+                    // console.log(userData[j]._id.toString(),currentCmt[k].userID);
+                    if(userData[j]._id.toString() == currentCmt[k].userID){
+                        // console.log("tìm thấy rồi")
+                        currentCmt[k].username = userData[j].username,
+                        currentCmt[k].name = userData[j].name,
+                        currentCmt[k].userAvatar = userData[j].avatar,
+                        findCmtUser = true;
+                        break;
+                    }
+                }
+                if(findCmtUser){
+                    refinedCmt.push(currentCmt[k]);
+                }
+            }
+            
+            var currentData = {
+                ...dataArticle[i]._doc,
+                userID : dataArticle[i].userID,
+                content: dataArticle[i].content,
+                imgUrl: dataArticle[i].imgUrl,
+                comments : refinedCmt,
+            }
+            
+
+            var isFindUser = false;
+            for(var j = 0; j < userData.length; j++){
+                if(dataArticle[i].userID == userData[j]._id){
+                    isFindUser = true;
+                    currentData.username = userData[j].username,
+                    currentData.avatar = userData[j].avatar;
+                    currentData.name = userData[j].name;
+                    break;
+                }
+            }
+            if(isFindUser){
+                summaryData.push(currentData);
+            }
+        }
+
+
+        res.status(200).send(
+            JSON.stringify({
+                data: summaryData
+            })
+        )
+    }
+
 }
 module.exports = new ArticleController();
