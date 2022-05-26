@@ -185,8 +185,8 @@ class AccountController {
       } else {
         // Check user và courses tồn tại để thêm khóa học vào database
         if (user && course) {
-          if (user.balance < course.price) {
-            res.status(200).send(
+          if (user.gem < course.price) {
+            res.status(500).send(
               JSON.stringify({
                 status: 0,
                 message: "Vui lòng nạp thêm GEM để tiếp tục sử dụng dịch vụ",
