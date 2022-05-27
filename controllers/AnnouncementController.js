@@ -91,7 +91,7 @@ class NotificationGenarelController {
     createAnnouncement = async (req, res) => {
         const { title, content, idUser } = req.body
         //const user = await User.findById(idUser).exec()
-        console.log(user)
+        console.log(idUser)
         const newAnnouncement = new Announcement({
             content,
             title,
