@@ -1,6 +1,29 @@
 const Article = require("../models/article");
 const User = require("../models/users");
 var mongoose = require('mongoose');
+const refineReplyComment = (replyComments, userData) => {
+    var res = [];
+    replyComments.forEach(replyComment => {
+        var currentReplyComment = replyComment;
+        var isFind = true;
+        for(var i = 0; i < userData.length; i++){
+            if(userData[i]._id.toString() == replyComment.userID){
+                currentReplyComment.username = userData[i].username;
+                currentReplyComment.name = userData[i].name;
+                currentReplyComment.userID = userData[i]._id;
+                currentReplyComment.userAvatar = userData[i].avatar;
+                if(currentReplyComment.replyComment.length>0)
+                    currentReplyComment.replyComment = refineReplyComment(currentReplyComment.replyComment, userData);
+                isFind= true;
+                break;
+            }
+        }
+        if(isFind){
+            res.push(currentReplyComment);
+        }
+    });
+    return res;
+}
 
 const getAllArticleOutside = async(req, res) => {
     var dataArticle;
@@ -35,9 +58,12 @@ const getAllArticleOutside = async(req, res) => {
                 // console.log(userData[j]._id.toString(),currentCmt[k].userID);
                 if(userData[j]._id.toString() == currentCmt[k].userID){
                     // console.log("tìm thấy rồi")
-                    currentCmt[k].username = userData[j].username,
-                    currentCmt[k].name = userData[j].name,
-                    currentCmt[k].userAvatar = userData[j].avatar,
+                    currentCmt[k].username = userData[j].username;
+                    currentCmt[k].name = userData[j].name;
+                    currentCmt[k].userAvatar = userData[j].avatar;
+                    currentCmt[k].userID = userData[j]._id;
+                    if(currentCmt[k].replyComment.length != 0)
+                        currentCmt[k].replyComment = refineReplyComment(currentCmt[k].replyComment, userData);
                     findCmtUser = true;
                     break;
                 }
@@ -554,6 +580,91 @@ class ArticleController {
         await getAllArticleOutside(req, res);
     }
     
+    addReplyComment = async(req, res) => {
+        console.log("req.body", req.body);
+        
+        
+        // Find current post 
+        var currentArticle;
+        await Article.findById(req.body.postID).exec()
+        .then((data) => {  
+            currentArticle = data;
+        })
+        .catch((error) => {
+            res.status(404).send({run: false, error:error});
+        })
 
+
+        // console.log("currentArticle", currentArticle);
+        if(req.body.parrentComment == []) return;
+        var currentCommentList = currentArticle.comments;
+        // console.log("currentCommentList", currentCommentList);
+        // console.log("req.body.parrentComment", req.body.parrentComment);
+
+        var temptComment = [{}];
+        for(var i = 0; i < currentCommentList.length; i++){
+            if(currentCommentList[i].commentID.toString() == req.body.parrentComment[0]){
+                temptComment[0] = currentCommentList[i];
+            }
+        }
+
+        console.log("temptComment[0]", temptComment[0]);
+        
+        for(var i = 1; i < req.body.parrentComment.length; i++){
+            console.log('chạy vào đây rồi', i)
+            console.log("req.body.parrentComment[i]",req.body.parrentComment[i]);
+            var isFind = false;
+            for(var j = 0; j < temptComment[i-1].replyComment.length; i++){
+                if(temptComment[i-1].replyComment[j].commentID.toString() == req.body.parrentComment[i]){
+                    temptComment.push(temptComment[i-1].replyComment[j]);
+                    console.log("tìm ra rồi");
+                    isFind = true;
+                    break;
+                }
+            }
+            if(!isFind) 
+                res.status(200).send({
+                    run: true
+                })
+        }
+        
+        temptComment[temptComment.length-1].replyComment.push({
+            commentID: mongoose.Types.ObjectId(),
+            userID: req.body.userID,
+            content: req.body.content,
+            type: '1',
+            imgUrl: req.body.imgUrl,
+            replyComment: [],
+            isHidden: false,
+            time: req.body.time,
+            reactions: [], 
+        })
+
+        // for(var i = 0; i < currentCommentList.length; i++){
+        //     console.log("currentCommentList", i, currentCommentList[i]);
+        // }
+        
+
+
+        await Article.findOneAndUpdate({_id: req.body.postID}, 
+            {
+                comments: currentCommentList,
+            }   
+        )
+        .then((dataRes) => {
+            
+        })
+        .catch((err) => {
+            res.status(404).send({run: false, err: err});
+        });
+
+        // // console.log("Thực hiện xong việc add cmt rồi");
+
+        await getAllArticleOutside(req, res);
+
+        // res.status(200).send({
+        //     run: true
+        // })
+    }
 }
 module.exports = new ArticleController();
