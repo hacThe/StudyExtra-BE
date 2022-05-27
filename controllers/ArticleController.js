@@ -107,7 +107,7 @@ const getAllArticleOutside = async(req, res) => {
 
 class ArticleController {
     getAllArticles = async (req, res) => {
-        await getAllArticleOutside(req, res);
+        await getAllArticleOutside(req, res);   
     }   
 
     addArticles = async (req, res) => {
@@ -143,23 +143,18 @@ class ArticleController {
             }
         }
 
-        newArticle.save()
+        await newArticle.save()
         .then((data) =>{
-            res.status(200).send({
-                success: true,
-                data: {
-                    ...data._doc,
-                    username: username,
-                    name: name,
-                    avatar:userAvatar,
-                },
-            });
+
         })
         .catch((error)=>{
             console.log("error", error)
             res.status(404).send({success:false});
         })
+
+        await getAllArticleOutside(req, res);   
         // res.status(200).send({run:true});
+        
     }
 
     editArticle = async (req, res) => {
@@ -179,36 +174,7 @@ class ArticleController {
             res.status(404).send({run: false, err: err});
         });
 
-        var newI = await Article.findById(req.body._id);
-        // if(!newI)
-        //     res.status(404).send({find: false});
-        
-        console.log("newI", newI)
-        var dataReturn = {...newI._doc};
-        // var isFind = false;
-        // var userData;
-
-        await User.findById(newI.userID).exec()
-            .then((data) => {  
-                // userData = data;
-                // isFind = true;
-                console.log("data",data);
-                dataReturn.username = data.username;
-                dataReturn.name = data.name;
-                dataReturn.avatar = data.avatar;
-                res.status(200).send(
-                    JSON.stringify({
-                        data: dataReturn,
-                    })
-                );
-            })
-            .catch((error) => {
-                res.status(404).send(error);
-            })
-        
-            
-        // console.log("userData", userData)
-        // res.status(200).send({run:true});
+        await getAllArticleOutside(req, res);   
 
     }
 
