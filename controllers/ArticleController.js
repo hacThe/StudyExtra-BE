@@ -991,5 +991,47 @@ class ArticleController {
 
         await getAllArticleOutside(req, res);
     }
+
+    editBigComment = async(req, res) => {
+        console.log("req.body", req.body);
+
+        var currentArticle;
+        await Article.findById(req.body.postID).exec()
+            .then((data) => {  
+                currentArticle = data;
+            })
+            .catch((error) => {
+                return res.status(404).send({run: false, error:error});
+            })
+        
+        var currentComment = {};
+        for(var i = 0; i < currentArticle.comments.length; i++){
+            if(req.body.commentID == currentArticle.comments[i].commentID.toString()){
+                console.log("Tìm thấy rồi");
+                currentComment = currentArticle.comments[i];
+            }
+        }
+
+        // console.log("currentComment", currentComment)
+        currentComment.content = req.body.content;
+        currentComment.imgUrl = req.body.imgUrl;
+
+        // console.log("currentArticle.comments", currentArticle.comments)
+
+        await Article.findOneAndUpdate({_id: req.body.postID}, 
+            {
+                comments: currentArticle.comments,
+            }   
+        )
+        .then((dataRes) => {
+            
+        })
+        .catch((err) => {
+            res.status(404).send({run: false, err: err});
+        });
+
+        await getAllArticleOutside(req, res);
+    }
+
 }
 module.exports = new ArticleController();

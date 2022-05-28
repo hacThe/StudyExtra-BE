@@ -10,6 +10,8 @@ router.delete('/', ArticleController.deleteArticles);
 
 router.post('/comment', ArticleController.addBigComment);
 router.delete('/comment', ArticleController.deleteBigComment);
+router.put('/comment', ArticleController.editBigComment);
+
 router.post('/comment/hide', ArticleController.hideBigComment);
 router.post('/comment/show', ArticleController.showBigComment);
 router.post('/comment/interaction', ArticleController.interactBigComment);
