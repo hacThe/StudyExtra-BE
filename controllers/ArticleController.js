@@ -296,7 +296,7 @@ class ArticleController {
             return;
         })
 
-        console.log("dataArticle",dataArticle)
+        // console.log("dataArticle",dataArticle)
         // Lấy cái commentID hiện tại
         var allComments = dataArticle.comments;
         for(var i = 0; i < allComments.length; i++){
@@ -338,7 +338,7 @@ class ArticleController {
             return;
         })
 
-        console.log("dataArticle",dataArticle)
+        // console.log("dataArticle",dataArticle)
         // Lấy cái commentID hiện tại
         var allComments = dataArticle.comments;
         for(var i = 0; i < allComments.length; i++){
@@ -840,6 +840,74 @@ class ArticleController {
             return item !== req.body.userID;
         })
 
+        
+        await Article.findOneAndUpdate({_id: req.body.postID}, 
+            {
+                comments: currentCommentList,
+            }   
+        )
+        .then((dataRes) => {
+            
+        })
+        .catch((err) => {
+            res.status(404).send({run: false, err: err});
+        });
+
+        await getAllArticleOutside(req, res);
+    }
+
+    hideReplyComment = async(req, res) => {
+        console.log("req.body", req.body);
+        var currentArticle;
+        await Article.findById(req.body.postID).exec()
+        .then((data) => {  
+            currentArticle = data;
+        })
+        .catch((error) => {
+            res.status(404).send({run: false, error:error});
+        })
+
+        // Đi đến cmt cần unlike
+        if(req.body.parrentComment == []) return;
+        var currentCommentList = currentArticle.comments;
+
+        var temptComment = [{}];
+        for(var i = 0; i < currentCommentList.length; i++){
+            if(currentCommentList[i].commentID.toString() == req.body.parrentComment[0]){
+                temptComment[0] = currentCommentList[i];
+            }
+        }
+
+        // console.log("temptComment[0]", temptComment[0]);
+    
+        for(var i = 1; i < req.body.parrentComment.length; i++){
+            // console.log('chạy vào đây rồi', i)
+            // console.log("temptComment[i-1]",temptComment[i-1]);
+            var isFind = false;
+            for(var j = 0; j < temptComment[i-1].replyComment.length; j++){
+                if(temptComment[i-1].replyComment[j].commentID.toString() == req.body.parrentComment[i]){
+                    temptComment.push(temptComment[i-1].replyComment[j]);
+                    // console.log("tìm ra rồi");
+                    isFind = true;
+                    break;
+                }
+            }
+            if(!isFind) 
+                res.status(400).send({
+                    run: false
+                })
+        }
+
+        for(var j = 0; j < temptComment[temptComment.length-1].replyComment.length; j++){
+            if(temptComment[temptComment.length-1].replyComment[j].commentID.toString() == req.body.commentID){
+                temptComment.push(temptComment[temptComment.length-1].replyComment[j]);
+                // console.log("tìm ra rồi");
+                isFind = true;
+                break;
+            }
+        }
+
+        temptComment[temptComment.length-1].isHidden = true;
         
         await Article.findOneAndUpdate({_id: req.body.postID}, 
             {
