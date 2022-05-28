@@ -16,6 +16,9 @@ router.post('/comment/interaction', ArticleController.interactBigComment);
 router.delete('/comment/interaction', ArticleController.unLikeBigComment);
 router.post('/comment/reply', ArticleController.addReplyComment);
 router.delete('/comment/reply', ArticleController.deleteReplyComment);
+router.post('/comment/reply/interaction', ArticleController.likeReplyComment);
+
+
 
 router.post('/interaction', ArticleController.interactArticle);
 router.delete('/interaction', ArticleController.unlikeArticle);

@@ -580,7 +580,7 @@ class ArticleController {
             // console.log('chạy vào đây rồi', i)
             // console.log("req.body.parrentComment[i]",req.body.parrentComment[i]);
             var isFind = false;
-            for(var j = 0; j < temptComment[i-1].replyComment.length; i++){
+            for(var j = 0; j < temptComment[i-1].replyComment.length; j++){
                 if(temptComment[i-1].replyComment[j].commentID.toString() == req.body.parrentComment[i]){
                     temptComment.push(temptComment[i-1].replyComment[j]);
                     console.log("tìm ra rồi");
@@ -659,10 +659,10 @@ class ArticleController {
         console.log("temptComment[0]", temptComment[0]);
         
         for(var i = 1; i < req.body.parrentComment.length; i++){
-            console.log('chạy vào đây rồi', i)
-            console.log("req.body.parrentComment[i]",req.body.parrentComment[i]);
+            // console.log('chạy vào đây rồi', i)
+            // console.log("req.body.parrentComment[i]",req.body.parrentComment[i]);
             var isFind = false;
-            for(var j = 0; j < temptComment[i-1].replyComment.length; i++){
+            for(var j = 0; j < temptComment[i-1].replyComment.length; j++){
                 if(temptComment[i-1].replyComment[j].commentID.toString() == req.body.parrentComment[i]){
                     temptComment.push(temptComment[i-1].replyComment[j]);
                     console.log("tìm ra rồi");
@@ -676,7 +676,7 @@ class ArticleController {
                 })
         }
 
-        console.log("temptComment[temptComment.length-1].replyComment", temptComment[temptComment.length-1].replyComment);
+        // console.log("temptComment[temptComment.length-1].replyComment", temptComment[temptComment.length-1].replyComment);
         var currentReply = temptComment[temptComment.length-1].replyComment;
         currentReply = currentReply.filter(function(item) {
             return item.commentID.toString() !== req.body.commentID
@@ -696,7 +696,85 @@ class ArticleController {
         });
 
         await getAllArticleOutside(req, res);
-        
+
     }
+
+    likeReplyComment = async(req,res) => {
+        console.log("req.body", req.body);
+
+        // Find current post 
+        var currentArticle;
+        await Article.findById(req.body.postID).exec()
+        .then((data) => {  
+            currentArticle = data;
+        })
+        .catch((error) => {
+            res.status(404).send({run: false, error:error});
+        })
+
+        if(req.body.parrentComment == []) return;
+        var currentCommentList = currentArticle.comments;
+
+        var temptComment = [{}];
+        for(var i = 0; i < currentCommentList.length; i++){
+            if(currentCommentList[i].commentID.toString() == req.body.parrentComment[0]){
+                temptComment[0] = currentCommentList[i];
+            }
+        }
+
+        console.log("temptComment[0]", temptComment[0]);
+        
+        for(var i = 1; i < req.body.parrentComment.length; i++){
+            // console.log('chạy vào đây rồi', i)
+            console.log("temptComment[i-1]",temptComment[i-1]);
+            var isFind = false;
+            for(var j = 0; j < temptComment[i-1].replyComment.length; j++){
+                if(temptComment[i-1].replyComment[j].commentID.toString() == req.body.parrentComment[i]){
+                    temptComment.push(temptComment[i-1].replyComment[j]);
+                    console.log("tìm ra rồi");
+                    isFind = true;
+                    break;
+                }
+            }
+            if(!isFind) 
+                res.status(400).send({
+                    run: false
+                })
+        }
+
+        // console.log("temptComment[temptComment.length-1].replyComment", temptComment[temptComment.length-1].replyComment);
+        // var currentReply = temptComment[temptComment.length-1].replyComment;
+        // currentReply = currentReply.filter(function(item) {
+        //     return item.commentID.toString() !== req.body.commentID
+        // })
+
+        for(var j = 0; j < temptComment[temptComment.length-1].replyComment.length; j++){
+            if(temptComment[temptComment.length-1].replyComment[j].commentID.toString() == req.body.commentID){
+                temptComment.push(temptComment[temptComment.length-1].replyComment[j]);
+                console.log("tìm ra rồi");
+                isFind = true;
+                break;
+            }
+        }
+
+        console.log("temptComment[temptComment.length-1]", temptComment[temptComment.length-1]);
+        // temptComment[temptComment.length-1].replyComment = currentReply;
+        temptComment[temptComment.length-1].reactions.push(req.body.userID);
+        
+        await Article.findOneAndUpdate({_id: req.body.postID}, 
+            {
+                comments: currentCommentList,
+            }   
+        )
+        .then((dataRes) => {
+            
+        })
+        .catch((err) => {
+            res.status(404).send({run: false, err: err});
+        });
+
+        await getAllArticleOutside(req, res);
+    }
+
 }
 module.exports = new ArticleController();
