@@ -16,8 +16,11 @@ router.post('/comment/hide', ArticleController.hideBigComment);
 router.post('/comment/show', ArticleController.showBigComment);
 router.post('/comment/interaction', ArticleController.interactBigComment);
 router.delete('/comment/interaction', ArticleController.unLikeBigComment);
+
 router.post('/comment/reply', ArticleController.addReplyComment);
 router.delete('/comment/reply', ArticleController.deleteReplyComment);
+router.put('/comment/reply', ArticleController.editReplyComment);
+
 router.post('/comment/reply/interaction', ArticleController.likeReplyComment);
 router.delete('/comment/reply/interaction', ArticleController.unlikeReplyComment);
 router.post('/comment/reply/hide', ArticleController.hideReplyComment);
