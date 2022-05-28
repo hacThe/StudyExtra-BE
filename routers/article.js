@@ -19,7 +19,7 @@ router.delete('/comment/reply', ArticleController.deleteReplyComment);
 router.post('/comment/reply/interaction', ArticleController.likeReplyComment);
 router.delete('/comment/reply/interaction', ArticleController.unlikeReplyComment);
 router.post('/comment/reply/hide', ArticleController.hideReplyComment);
-
+router.post('/comment/reply/show', ArticleController.showReplyComment);
 
 router.post('/interaction', ArticleController.interactArticle);
 router.delete('/interaction', ArticleController.unlikeArticle);
