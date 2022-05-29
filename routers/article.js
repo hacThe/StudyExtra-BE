@@ -29,6 +29,6 @@ router.post('/comment/reply/show', ArticleController.showReplyComment);
 router.post('/interaction', ArticleController.interactArticle);
 router.delete('/interaction', ArticleController.unlikeArticle);
 
-
+router.post('/interaction-list', ArticleController.getArticleInteractionList);
 
 module.exports = router;

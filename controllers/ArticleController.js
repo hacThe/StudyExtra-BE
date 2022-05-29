@@ -1106,5 +1106,53 @@ class ArticleController {
 
         await getAllArticleOutside(req, res);
     }
+
+    getArticleInteractionList = async(req, res) => {
+        console.log("req.body", req.body);
+
+        var currentArticle;
+
+        await Article.findById(req.body.postID).exec()
+            .then((data) => {  
+                currentArticle = data;
+            })
+            .catch((error) => {
+                return res.status(404).send({run: false, error:error});
+            })
+
+        var userList = currentArticle.reactions;
+        console.log(userList);
+
+        var userData;
+        await User.find().exec()
+            .then((data) => {  
+                userData = data;
+            })
+            .catch((error) => {
+                return res.status(404).send(error);
+            })
+
+        var result = [];
+        
+        for(var i = 0; i < userList.length; i++){
+            for(var j = 0; j < userData.length ; j++){
+                // console.log(userList[i].toString(), userData[j]._id.toString());
+                if(userList[i].toString() == userData[j]._id.toString()){
+                    result.push({
+                        userID: userData[j]._id,
+                        avatar: userData[j].avatar,
+                        name: userData[j].name,
+                    })
+                }
+            }
+        }
+
+
+        res.status(200).send({
+            run: true,
+            result: result
+        })
+    
+    }
 }
 module.exports = new ArticleController();
