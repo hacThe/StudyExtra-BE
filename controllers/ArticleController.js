@@ -1088,7 +1088,7 @@ class ArticleController {
             }
         }
 
-        console.log("temptComment[temptComment.length-1]", temptComment[temptComment.length-1]);
+        // console.log("temptComment[temptComment.length-1]", temptComment[temptComment.length-1]);
         temptComment[temptComment.length-1].content = req.body.content;
         temptComment[temptComment.length-1].imgUrl = req.body.imgUrl;
 
@@ -1121,7 +1121,7 @@ class ArticleController {
             })
 
         var userList = currentArticle.reactions;
-        console.log(userList);
+        // console.log(userList);
 
         var userData;
         await User.find().exec()
@@ -1153,6 +1153,109 @@ class ArticleController {
             result: result
         })
     
+    }
+
+    getCommentInteractionList = async(req, res) => {
+        console.log("req.body", req.body);
+        var currentArticle;
+
+        await Article.findById(req.body.postID).exec()
+            .then((data) => {  
+                currentArticle = data;
+            })
+            .catch((error) => {
+                res.status(404).send({run: false, error:error});
+            })
+
+        var currentCommentList = currentArticle.comments;
+        console.log("currentCommentList", currentCommentList);
+        var userIDList;
+        // console.log("req.body.parrentComment", req.body.parrentComment)
+        if(req.body.parrentComment.length == 0) {
+            // console.log("Vô đây rồi");
+            for(var i = 0; i < currentCommentList.length; i++){
+                if(currentCommentList[i].commentID.toString() == req.body.commentID){
+                    // console.log("Tìm thấy rồi");
+                    userIDList = currentCommentList[i].reactions;
+                }
+            }
+        }
+        else {
+            var currentCommentList = currentArticle.comments;
+
+            var temptComment = [{}];
+            for(var i = 0; i < currentCommentList.length; i++){
+                if(currentCommentList[i].commentID.toString() == req.body.parrentComment[0]){
+                    temptComment[0] = currentCommentList[i];
+                }
+            }
+
+            // console.log("temptComment[0]", temptComment[0]);
+        
+            for(var i = 1; i < req.body.parrentComment.length; i++){
+                // console.log('chạy vào đây rồi', i)
+                // console.log("temptComment[i-1]",temptComment[i-1]);
+                var isFind = false;
+                for(var j = 0; j < temptComment[i-1].replyComment.length; j++){
+                    if(temptComment[i-1].replyComment[j].commentID.toString() == req.body.parrentComment[i]){
+                        temptComment.push(temptComment[i-1].replyComment[j]);
+                        // console.log("tìm ra rồi");
+                        isFind = true;
+                        break;
+                    }
+                }
+                if(!isFind){
+                    console.log("Không tìm thấy trong cái parrent");
+                    return res.status(400).send({
+                        run: false
+                    })
+                } 
+                    
+            }
+
+            for(var j = 0; j < temptComment[temptComment.length-1].replyComment.length; j++){
+                if(temptComment[temptComment.length-1].replyComment[j].commentID.toString() == req.body.commentID){
+                    temptComment.push(temptComment[temptComment.length-1].replyComment[j]);
+                    // console.log("tìm ra rồi");
+                    isFind = true;
+                    break;
+                }
+            }
+
+            // console.log("temptComment[temptComment.length-1]", temptComment[temptComment.length-1]);
+
+            userIDList = temptComment[temptComment.length-1].reactions;
+        }
+        console.log("userIDList", userIDList);
+
+        var userData;
+        await User.find().exec()
+            .then((data) => {  
+                userData = data;
+            })
+            .catch((error) => {
+                return res.status(404).send(error);
+            })
+
+        var result = [];
+        
+        for(var i = 0; i < userIDList.length; i++){
+            for(var j = 0; j < userData.length ; j++){
+                // console.log(userList[i].toString(), userData[j]._id.toString());
+                if(userIDList[i].toString() == userData[j]._id.toString()){
+                    result.push({
+                        userID: userData[j]._id,
+                        avatar: userData[j].avatar,
+                        name: userData[j].name,
+                    })
+                }
+            }
+        }
+
+        res.status(200).send({
+            run: true,
+            result: result
+        })
     }
 }
 module.exports = new ArticleController();
