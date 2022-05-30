@@ -57,8 +57,6 @@ class CoursesController {
       });
   };
 
-
-
   getOne = async (req, res) => {
     const id = req.params.id;
     Course.findOne({ courseId: id })
@@ -72,6 +70,29 @@ class CoursesController {
           res.status(200).send(
             JSON.stringify({
               data: course,
+            })
+          );
+        } else {
+          res.status(404).send({ message: "Course not found" });
+        }
+      })
+      .catch((error) => {
+        res.status(404).send(error.toString());
+      });
+  };
+
+  getCourseStudent = async (req, res) => {
+    const id = req.params.id;
+    Course.findOne({ courseId: id })
+      .populate({
+        path: "studentIds",
+      })
+      .exec()
+      .then((course) => {
+        if (course) {
+          res.status(200).send(
+            JSON.stringify({
+              data: course.studentIds,
             })
           );
         } else {
@@ -247,11 +268,13 @@ class CoursesController {
               res.redirect(303, `../../../courses/${editedCourse.courseId}`);
             });
 
-            Lesson.deleteMany({ chapterId: id }).then((data) => {
-              console.log({ data })
-            }).catch(err => {
-              console.log({ err })
-            })
+            Lesson.deleteMany({ chapterId: id })
+              .then((data) => {
+                console.log({ data });
+              })
+              .catch((err) => {
+                console.log({ err });
+              });
           } else {
             res.status(500).send(JSON.stringify(err));
           }
@@ -261,8 +284,6 @@ class CoursesController {
         res.status(404).send(err);
       });
   };
-
-
 
   deleteLesson = async (req, res) => {
     const id = req.params.id;
@@ -282,7 +303,6 @@ class CoursesController {
                   res.status(400).send({ message: err });
                 });
             });
-
           } else {
             res.status(500).send(JSON.stringify(err));
           }
