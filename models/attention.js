@@ -4,14 +4,14 @@ const Schema = mongoose.Schema;
 
 const AttentionSchema = new Schema({
     username: String,
-    examID: { type: Schema.Types.ObjectId, ref: "userID" },
+    examID: { type: Schema.Types.ObjectId, ref: "exams" },
     maxScore: Number,
     testRound: Number,
     result: [{
         score: Number,
         userAnswer: Array,
     }],
-    userID: { type: Schema.Types.ObjectId, ref: "userID" },
+    userID: { type: Schema.Types.ObjectId, ref: "users" },
 
 },
     {timestamps: true}

@@ -172,7 +172,7 @@ class ExamsController {
             var ObjectId = require('mongodb').ObjectId;
             const examID = new ObjectId(id);
             const exam = await Exam.findOne({ _id: examID }).exec();
-            
+
             if (!exam) return res.status(400).send("Exam not found");
             await Exam.updateOne({ _id: examID }, { attempt: exam.attempt + 1 }).exec();
 
@@ -180,7 +180,7 @@ class ExamsController {
             if (attention !== null && attention.testRound == exam.testCount) return res.status(400).send(JSON.stringify({ message: "Bạn không còn lượt làm bài" }));
             if (attention) {
                 attention.testRound += 1;
-                attention.result.push({score: 0, userAnswer: []})
+                attention.result.push({ score: 0, userAnswer: [] })
                 attention.save()
                     .then(() => {
                         res.status(200).send(
@@ -251,7 +251,7 @@ class ExamsController {
                 if (!data) res.status(400).send('attention not found');
                 const attID = new ObjectId(data._id);
 
-                if(data.maxScore < score){
+                if (data.maxScore < score) {
                     user.point = user.point - data.maxScore + score;
                     user.save();
                 }
@@ -302,10 +302,11 @@ class ExamsController {
 
     getTopResult = async (req, res) => {
         const examID = req.params.id;
+        var ObjectId = require('mongodb').ObjectId;
         const id = new ObjectId(examID);
+        console.log(id);
 
-
-        Attention.find({ examID: id }).sort({ 'score': -1 }).limit(10).exec()
+        Attention.find({ examID: id }).populate('userID').sort({ 'maxScore': 'desc' }).limit(10).exec()
             .then((data) => {
                 console.log(data);
                 res.status(200).send(
