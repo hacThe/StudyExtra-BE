@@ -15,8 +15,7 @@ const NotificationSchema = new Schema ({
         type: String,//system/user/
         required: true,
     },
-    creator: String,//username người tạo thông báo
-    imgUrl: String,
+    creator: { type: Schema.Types.ObjectId, ref: "users" },//id người tạo thông báo
     fileUrl: String
 },
     { timestamps: true }
