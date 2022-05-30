@@ -7,7 +7,7 @@ class ExamsController {
 
     saveExam = async (req, res) => {
         try {
-            const { id, name, questionPoint, listQuestion, time, typeCategory, description,requirement } = req.body
+            const { id, name, questionPoint, listQuestion, time, typeCategory, description, requirement } = req.body
             Exam.findByIdAndUpdate(id,
                 {
                     name,
@@ -106,7 +106,7 @@ class ExamsController {
 
     addNewExam = async (req, res) => {
         try {
-            const { name, questionPoint, listQuestion, time, typeCategory,description,requirement } = req.body
+            const { name, questionPoint, listQuestion, time, typeCategory, description, requirement } = req.body
             console.log(req.body)
             const newTestExam = new Exam({
                 name,
@@ -167,37 +167,57 @@ class ExamsController {
     checkExamRequirement = async (req, res) => {
         const { id } = req.body;
         const username = res.locals.data.username;
-        let testRound = 1;
 
         try {
             var ObjectId = require('mongodb').ObjectId;
             const examID = new ObjectId(id);
             const exam = await Exam.findOne({ _id: examID }).exec();
-            console.log(exam);
+            
             if (!exam) return res.status(400).send("Exam not found");
             await Exam.updateOne({ _id: examID }, { attempt: exam.attempt + 1 }).exec();
 
-            const attention = await Attention.findOne({ username: username, examID: id }).sort({ '_id': -1 }).limit(1).exec();
+            const attention = await Attention.findOne({ username: username, examID: examID }).exec();
             if (attention !== null && attention.testRound == exam.testCount) return res.status(400).send(JSON.stringify({ message: "Bạn không còn lượt làm bài" }));
             if (attention) {
-                testRound = attention.testRound + 1;
-            }
-
-            const newAttention = new Attention({
-                username: username,
-                examID: id,
-                score: 0,
-                testRound: testRound,
-                userAnswer: []
-            })
-            console.log("new attten: ", newAttention)
-            newAttention.save().then((data) => {
-                res.status(200).send(
-                    JSON.stringify({
-                        mmessage: "you can taking"
+                attention.testRound += 1;
+                attention.result.push({score: 0, userAnswer: []})
+                attention.save()
+                    .then(() => {
+                        res.status(200).send(
+                            JSON.stringify({
+                                mmessage: "you can taking"
+                            })
+                        )
                     })
-                )
-            });
+                    .catch((err) => {
+                        res.status(400).send(error);
+                    })
+            }
+            else {
+                const result = [{
+                    score: 0,
+                    userAnswer: []
+                }]
+                const user = await User.findOne({ username: username }).exec();
+                const newAttention = new Attention({
+                    username: username,
+                    examID: id,
+                    maxScore: 0,
+                    testRound: 1,
+                    result: result,
+                    userID: user._id
+                })
+                console.log("new attten: ", newAttention)
+                newAttention.save().then((data) => {
+                    res.status(200).send(
+                        JSON.stringify({
+                            mmessage: "you can taking"
+                        })
+                    )
+                });
+                user.attentions.push(newAttention._id);
+                user.save();
+            }
         }
         catch (error) {
             res.status(400).send(error);
@@ -214,8 +234,9 @@ class ExamsController {
         const id = new ObjectId(examID)
 
         const exam = await Exam.findOne({ _id: id }).exec();
-        console.log(exam);
         if (!exam) res.status(400).send("Exam not found");
+
+        const user = await User.findOne({ username: username }).exec();
 
         exam.listQuestion.forEach(element => {
             rightAnswer.push(element.rightAnswer);
@@ -224,22 +245,27 @@ class ExamsController {
             if (rightAnswer[i] + 1 === userAnswer[i]) score = score + 1;
         }
 
-        Attention.findOne({ username: username, examID: examID }).sort({ '_id': -1 }).limit(1).exec()
+        Attention.findOne({ username: username, examID: id }).exec()
             .then((data) => {
+                console.log(data);
                 if (!data) res.status(400).send('attention not found');
                 const attID = new ObjectId(data._id);
-                Attention.updateOne({ _id: attID }, { score: score, userAnswer: userAnswer }).exec()
+
+                if(data.maxScore < score){
+                    user.point = user.point - data.maxScore + score;
+                    user.save();
+                }
+
+                const maxScore = score > data.maxScore ? score : data.maxScore;
+                const result = data.result;
+                result.splice(-1);
+                result.push({ score: score, userAnswer: userAnswer });
+
+                Attention.updateOne({ _id: attID }, { result: result, maxScore: maxScore }).exec()
                     .then(() => {
-                        User.findOne({ username: username }).exec()
-                            .then((user) => {
-                                if (user) User.updateOne({ point: user.point + score }).exec();
-                            })
-                            .catch((error) => {
-                                res.status(400).send(error);
-                            })
                         res.status(200).send(
                             JSON.stringify({
-                                message: "Save result success"
+                                mmessage: "Result saved"
                             })
                         )
                     })
@@ -254,12 +280,32 @@ class ExamsController {
 
     getResultExam = async (req, res) => {
         const examID = req.params.id;
-        console.log("ttttttttttttttttt: ", examID);
-       // const username = res.locals.data.username;
-       const username = 'tanthanh3'
-        console.log(examID);
+        var ObjectId = require('mongodb').ObjectId;
+        const id = new ObjectId(examID);
 
-        Attention.findOne({ examID: examID, username: username }).sort({ '_id': -1 }).limit(1).exec()
+        const username = res.locals.data.username;
+
+        Attention.findOne({ examID: id, username: username }).exec()
+            .then((data) => {
+                console.log(data);
+                res.status(200).send(
+                    JSON.stringify({
+                        message: "get success",
+                        data: data.result[data.result.length - 1]
+                    })
+                )
+            })
+            .catch((error) => {
+                res.status(400).send(error);
+            })
+    }
+
+    getTopResult = async (req, res) => {
+        const examID = req.params.id;
+        const id = new ObjectId(examID);
+
+
+        Attention.find({ examID: id }).sort({ 'score': -1 }).limit(10).exec()
             .then((data) => {
                 console.log(data);
                 res.status(200).send(
@@ -269,7 +315,7 @@ class ExamsController {
                     })
                 )
             })
-            .catch((error)=>{
+            .catch((error) => {
                 res.status(400).send(error);
             })
     }
