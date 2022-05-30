@@ -1,14 +1,15 @@
-const mongoose = require ('mongoose')
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const UserSchema = new Schema ({
+const UserSchema = new Schema(
+  {
     username: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
     password: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
     name: String,
     phone: String,
@@ -18,20 +19,21 @@ const UserSchema = new Schema ({
     avatar: String,
     courseID: [{ type: Schema.Types.ObjectId, ref: "courses" }],
     gem: {
-        type: Number,
-        default: 0
+      type: Number,
+      default: 0,
     },
     birthday: Date,
     point: {
-        type: Number,
-        default: 0
+      type: Number,
+      default: 0,
     },
     gender: String,
     isLock: Boolean, // Check xem tài khoản có đang khóa hay không
     transactions: [{ type: Schema.Types.ObjectId, ref: "transactions" }],
-},
-    { timestamps: true }
+    attentions: [{ type: Schema.Types.ObjectId, ref: "attention" }],
+  },
+  { timestamps: true }
 );
 
-const User = mongoose.model('users', UserSchema);
+const User = mongoose.model("users", UserSchema);
 module.exports = User;

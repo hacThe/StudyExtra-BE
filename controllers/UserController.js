@@ -21,8 +21,52 @@ class userController {
   };
 
   getUser = async (req, res) => {
-    const id = req.params.id || res.locals.data.userId;
-    User.findById(id).populate('transactions courseID').exec()
+    const id = req.params.id;
+    User.findById(id)
+      .populate("transactions courseID")
+      .exec()
+      .then((data) => {
+        res.status(200).send(
+          JSON.stringify({
+            data: data,
+          })
+        );
+      })
+      .catch((error) => {
+        res.status(404).send(error.toString());
+      });
+  };
+  getUserExam = async (req, res) => {
+    const id = req.params.id;
+
+    User.findById(id)
+      .populate({
+        path: "attentions",
+        populate: { path: "examID" },
+      })
+      .exec()
+      .then((data) => {
+        res.status(200).send(
+          JSON.stringify({
+            data: data.attentions.map((item) => {
+              const temp = {};
+              (temp.name = item.examID.name), (temp._id = item._id);
+              return temp;
+            }),
+          })
+        );
+      })
+      .catch((error) => {
+        res.status(404).send(error.toString());
+      });
+  };
+
+  getCurrentUser = async (req, res) => {
+    const id = res.locals.data.userId;
+
+    User.findById(id)
+      .populate("transactions courseID")
+      .exec()
       .then((data) => {
         res.status(200).send(
           JSON.stringify({
@@ -35,14 +79,23 @@ class userController {
       });
   };
 
-  getCurrentUser = async (req, res) => {
-    const id =  res.locals.data.userId
-    
-    User.findById(id).populate('transactions courseID').exec()
+  getCurrentUserExam = async (req, res) => {
+    const id = res.locals.data.userId;
+
+    User.findById(id)
+      .populate({
+        path: "attentions",
+        populate: { path: "examID" },
+      })
+      .exec()
       .then((data) => {
         res.status(200).send(
           JSON.stringify({
-            data: data,
+            data: data.attentions.map((item) => {
+              const temp = {};
+              (temp.name = item.examID.name), (temp._id = item._id);
+              return temp;
+            }),
           })
         );
       })
