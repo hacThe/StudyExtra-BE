@@ -7,7 +7,7 @@ class ExamsController {
 
     saveExam = async (req, res) => {
         try {
-            const { id, name, questionPoint, listQuestion, time, typeCategory, description,requirement } = req.body
+            const { id, name, questionPoint, listQuestion, time, typeCategory, description, requirement, testCount, detail } = req.body
             Exam.findByIdAndUpdate(id,
                 {
                     name,
@@ -16,7 +16,9 @@ class ExamsController {
                     time,
                     typeCategory,
                     description,
-                    requirement
+                    requirement,
+                    testCount,
+                    detail
                 },
                 (err, docs) => {
                     if (err) {
@@ -106,7 +108,7 @@ class ExamsController {
 
     addNewExam = async (req, res) => {
         try {
-            const { name, questionPoint, listQuestion, time, typeCategory,description,requirement } = req.body
+            const { name, questionPoint, listQuestion, time, typeCategory, description, requirement, testCount ,detail } = req.body
             console.log(req.body)
             const newTestExam = new Exam({
                 name,
@@ -115,7 +117,9 @@ class ExamsController {
                 time,
                 typeCategory,
                 description,
-                requirement
+                requirement,
+                testCount,
+                detail
             })
 
             newTestExam.save()
