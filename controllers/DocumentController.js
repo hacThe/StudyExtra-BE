@@ -2,9 +2,7 @@ const Document = require("../models/document");
 var mongoose = require('mongoose');
 class DocumentController {
     getAllDocument = async (req, res) => {
-        console.log("req.query.id", req.query.id);
-        if(typeof req.query.id == 'undefined'){
-            Document.find().exec()
+        Document.find().exec()
             .then((data) => {
                 res.status(200).send(
                     JSON.stringify({
@@ -20,37 +18,28 @@ class DocumentController {
                         error: error
                     })
                 );
-            })
-        }
-        else {
-            try{
-                var newI = await Document.findById(req.query.id);
-                if(newI!=null){
-                    res.status(200).send(
-                        JSON.stringify({
-                            data: newI
-                        })
-                    )
-                }
-                else{
-                    res.status(200).send(
-                        JSON.stringify({
-                            success: true,
-                            found: false
-                        })
-                    )
-                }
-            }
-            catch(e){
-                res.status(404).send(
-                    JSON.stringify({
-                        success: false,
-                        error: e,
-                    })
-                );
-            }
-        }
-        
+            })   
+    }
+
+    getDocumentByID = async(req, res) => {
+        console.log("req", req.params.id);
+        Document.findById(req.params.id).exec()
+        .then((data) => {
+            res.status(200).send(
+                JSON.stringify({
+                    success: true,
+                    data: data
+                })
+            )
+        })
+        .catch((error) => {
+            res.status(404).send(
+                JSON.stringify({
+                    success: false,
+                    error: error
+                })
+            );
+        })
     }
 
     addNewDocument = async(req, res) => {
@@ -79,9 +68,9 @@ class DocumentController {
     }   
 
     editDocument = async(req, res) => {
-        console.log("edit, body",req.body);
-        var newI = await Document.findOne({_id: req.body._id});
-        console.log("newI", newI);
+        // console.log("edit, body",req.body);
+        // var newI = await Document.findOne({_id: req.body._id});
+        // console.log("newI", newI);
 
         Document.findOneAndUpdate({_id: req.body._id}, 
             {
@@ -96,6 +85,31 @@ class DocumentController {
             res.status(200).send(
                 JSON.stringify({
                     data,
+                })
+            );   
+        })
+        .catch((err) => {
+            res.status(404).send({run: false, err: err});
+        });
+
+        // res.status(200).send({run:true});
+    }
+
+    increasingViewDocument = async(req, res) => {
+        // console.log("edit, body", req.body);
+        var newI = await Document.findOne({_id: req.body._id});
+        console.log("newI", newI);
+
+        if(newI == null) return res.status(404).send({run: false, find: false});
+        // console.log(newI)
+        Document.findOneAndUpdate({_id: req.body._id}, 
+            {
+                views: (newI.views + 1),
+            }
+        ).then((data) => {
+            res.status(200).send(
+                JSON.stringify({
+                    increasing: true
                 })
             );   
         })
