@@ -2,7 +2,9 @@ const Document = require("../models/document");
 var mongoose = require('mongoose');
 class DocumentController {
     getAllDocument = async (req, res) => {
-        Document.find().exec()
+        console.log("req.query.id", req.query.id);
+        if(typeof req.query.id == 'undefined'){
+            Document.find().exec()
             .then((data) => {
                 res.status(200).send(
                     JSON.stringify({
@@ -18,8 +20,39 @@ class DocumentController {
                         error: error
                     })
                 );
-            })   
+            })
+        }
+        else {
+            try{
+                var newI = await Document.findById(req.query.id);
+                if(newI!=null){
+                    res.status(200).send(
+                        JSON.stringify({
+                            data: newI
+                        })
+                    )
+                }
+                else{
+                    res.status(200).send(
+                        JSON.stringify({
+                            success: true,
+                            found: false
+                        })
+                    )
+                }
+            }
+            catch(e){
+                res.status(404).send(
+                    JSON.stringify({
+                        success: false,
+                        error: e,
+                    })
+                );
+            }
+        }
+        
     }
+
 
     getDocumentByID = async(req, res) => {
         console.log("req", req.params.id);
