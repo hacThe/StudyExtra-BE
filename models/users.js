@@ -30,7 +30,8 @@ const UserSchema = new Schema(
     gender: String,
     isLock: Boolean, // Check xem tài khoản có đang khóa hay không
     transactions: [{ type: Schema.Types.ObjectId, ref: "transactions" }],
-    attentions: [{ type: Schema.Types.ObjectId, ref: "attention" }],
+    attentions: [{ type: Schema.Types.ObjectId, ref: "attentions" }],
+    notifications: [{ type: Schema.Types.ObjectId, ref: "notifications" }], //những thông báo người này tạo ra
   },
   { timestamps: true }
 );
