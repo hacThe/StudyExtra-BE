@@ -24,6 +24,5 @@ const AnnouncementSchema = new Schema(
 
 mongoose.plugin(slug)
 
-
 const Announcement = mongoose.model('announcement', AnnouncementSchema);
 module.exports = Announcement;
