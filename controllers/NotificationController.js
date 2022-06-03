@@ -2,8 +2,11 @@ const Notification = require("../models/notification");
 const User =  require("../models/users");
 class NotificationController {
   getUserNotification = async (req, res) => {
-    const username = res.locals.data.username;
     
+    try {
+        //Bug chỗ này
+        const username = res.locals.data.username ? "":"";
+        
     Notification.find({ username: username }).exec()
       .then((data) => {
         console.log("data notification: ", data);
@@ -14,8 +17,14 @@ class NotificationController {
         )
       })
       .catch((error) => {
-        res.status(404).send(error);
+        throw Error(error.toString());
       })
+    }
+    catch(err){
+      console.log("Lỗi ở đây")
+      res.status(404).send(error);
+    }
+    
   }
 
 
