@@ -4,30 +4,30 @@ class NotificationController {
   getUserNotification = async (req, res) => {
     const username = res.locals.data.username;
 
-    Notification.find({ username: username }).populate('creator').exec()
+    Notification.find({ username: username })
+      .populate("creator")
+      .exec()
       .then((data) => {
         console.log("data notification: ", data);
         res.status(200).send(
           JSON.stringify({
-            data: data
+            data: data,
           })
-        )
+        );
       })
       .catch((error) => {
-        res.status(404).send(error);
-      })
-  }
-
+        throw Error(error.toString());
+      });
+  };
 
   createNotification = async (req, res) => {
-
     try {
       const newNotification = new Notification({
         username: req.body.username,
         content: req.body.content,
         type: req.body.type,
         creator: req.body.creator,
-        fileUrl: req.body.fileUrl
+        fileUrl: req.body.fileUrl,
       });
       console.log("not: ", newNotification);
 
@@ -44,11 +44,8 @@ class NotificationController {
       );
 
       res.status(400).send(error);
-    }
-    catch (error) {
-    }
-
-  }
+    } catch (error) {}
+  };
 }
 
 module.exports = new NotificationController();

@@ -53,6 +53,28 @@ class DocumentController {
         
     }
 
+
+    getDocumentByID = async(req, res) => {
+        console.log("req", req.params.id);
+        Document.findById(req.params.id).exec()
+        .then((data) => {
+            res.status(200).send(
+                JSON.stringify({
+                    success: true,
+                    data: data
+                })
+            )
+        })
+        .catch((error) => {
+            res.status(404).send(
+                JSON.stringify({
+                    success: false,
+                    error: error
+                })
+            );
+        })
+    }
+
     addNewDocument = async(req, res) => {
         console.log("req.body", req.body);
         var newDocument = new Document({    
@@ -79,9 +101,9 @@ class DocumentController {
     }   
 
     editDocument = async(req, res) => {
-        console.log("edit, body",req.body);
-        var newI = await Document.findOne({_id: req.body._id});
-        console.log("newI", newI);
+        // console.log("edit, body",req.body);
+        // var newI = await Document.findOne({_id: req.body._id});
+        // console.log("newI", newI);
 
         Document.findOneAndUpdate({_id: req.body._id}, 
             {
@@ -96,6 +118,31 @@ class DocumentController {
             res.status(200).send(
                 JSON.stringify({
                     data,
+                })
+            );   
+        })
+        .catch((err) => {
+            res.status(404).send({run: false, err: err});
+        });
+
+        // res.status(200).send({run:true});
+    }
+
+    increasingViewDocument = async(req, res) => {
+        // console.log("edit, body", req.body);
+        var newI = await Document.findOne({_id: req.body._id});
+        console.log("newI", newI);
+
+        if(newI == null) return res.status(404).send({run: false, find: false});
+        // console.log(newI)
+        Document.findOneAndUpdate({_id: req.body._id}, 
+            {
+                views: (newI.views + 1),
+            }
+        ).then((data) => {
+            res.status(200).send(
+                JSON.stringify({
+                    increasing: true
                 })
             );   
         })
