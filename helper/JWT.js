@@ -23,19 +23,24 @@ function JWTVerify(token) {
 }
 
 async function AuthMiddleware(req, res, next) {
-  if(Object.keys(req.body).length==0)
-  {
-      req.body=req.query;
+  try {
+    if(Object.keys(req.body).length==0)
+    {
+        req.body=req.query;
+    }
+    const authorizationHeader = req.headers["authorization"];
+    const token = authorizationHeader?.split(" ")[1];
+    if (!token) res.sendStatus(401);
+    jwt.verify(token, process.env.JWT_SECRET, (err, data) => {
+      // console.log({err, data});
+      // if (err) {next();}//res.sendStatus(403);
+      res.locals.data = data
+      next();
+    });
   }
-  const authorizationHeader = req.headers["authorization"];
-  const token = authorizationHeader?.split(" ")[1];
-  if (!token) res.sendStatus(401);
-  jwt.verify(token, process.env.JWT_SECRET, (err, data) => {
-    console.log({err, data});
-    if (err) res.sendStatus(403);
-    res.locals.data = data
+  catch(err){
     next();
-  });
+  }
 }
 
 module.exports = { JWTAuthToken, AuthMiddleware, JWTVerify };

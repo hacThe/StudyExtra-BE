@@ -16,7 +16,7 @@ class NotificationGenarelController {
             })
             .catch((error) => {
                 console.log('thất bại')
-                res.status(404).send(error);
+                res.status(404).send();
             })
     }
 
