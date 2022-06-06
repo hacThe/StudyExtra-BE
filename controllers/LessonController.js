@@ -53,7 +53,45 @@ class LessonController {
             currentCourseChapter: currentCourseChapter
         })
     }
-    
+    saveNotion = async(req, res) => {
+        console.log("req.body", req.body);
+        let lessonA ;
+        await Lesson.findById(req.body.lessonID)
+        .then(data => {
+            lessonA = data;
+        })
+        .catch((error) => {
+            return res.status(400).send({
+                success: false,
+            })
+        })
+
+        let currentNote = lessonA.notes;
+        console.log("currentNote", currentNote);
+        currentNote = currentNote.filter((item) => {
+            return item.userID !== req.body.userID;
+        })
+
+        currentNote.push({
+            userID: req.body.userID,
+            note: req.body.content,
+        })
+
+        await Lesson.findByIdAndUpdate(req.body.lessonID, {
+            notes: currentNote,        
+        })
+            .then(data => {
+                res.status(200).send({
+                    success: true,
+                })
+            })
+            .catch((error) => {
+                return res.status(400).send({
+                    success: false,
+                })
+            })
+        
+    }
 }
 
 module.exports = new LessonController();

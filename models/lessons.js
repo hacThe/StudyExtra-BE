@@ -6,10 +6,12 @@ const LessonsSchema = new Schema ({
     name: String,
     videoUrl: String,
     documentUrl: String,
-    passed: {
-        type: Array,
-        default: []
-    }
+    notes: [
+        {
+            userID: String,
+            note: String,
+        }
+    ]
 },
     { timestamps: true }
 );
