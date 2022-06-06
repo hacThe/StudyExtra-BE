@@ -5,7 +5,11 @@ const LessonsSchema = new Schema ({
     chapterId: { type: Schema.Types.ObjectId, ref: 'chapters' },
     name: String,
     videoUrl: String,
-    documentUrl: String
+    documentUrl: String,
+    passed: {
+        type: Array,
+        default: []
+    }
 },
     { timestamps: true }
 );
