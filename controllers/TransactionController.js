@@ -1,6 +1,6 @@
 const User = require("../models/users");
 const Transaction = require("../models/transaction");
-const { ObjectId, ObjectID} = require("mongodb");
+const { ObjectId, ObjectID } = require("mongodb");
 
 class TransactionController {
   createDepositRequest = async (req, res) => {
@@ -185,6 +185,16 @@ class TransactionController {
         res.status(404).send(err);
       });
   };
+
+  getAllTransaction = async (req, res) => {
+    const transaction = await Transaction.find()
+
+    res.status(200).send(JSON.stringify({
+      data: transaction,
+      status: 200,
+    }))
+  }
+
 }
 
 module.exports = new TransactionController();
