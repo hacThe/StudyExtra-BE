@@ -2,6 +2,7 @@ const { RenameObjectKey } = require("../helper/RenameObjectKey");
 const Chapter = require("../models/chapter");
 const Course = require("../models/courses");
 const Lesson = require("../models/lessons");
+const Users = require("../models/users")
 const ObjectId = require("mongodb").ObjectID;
 class CoursesController {
   getAllCourses = async (req, res) => {
@@ -398,6 +399,31 @@ class CoursesController {
       }
     );
   };
+
+  getRanking = async (req, res) => {
+    const users = await Users.find()
+
+    users.sort((firstItem, secondItem) => secondItem.point - firstItem.point)
+
+    res.status(200).send(JSON.stringify({
+      data: users,
+      status: 200,
+    }))
+  }
+
+  getListUser = async (req, res) => {
+    const users = await Users.find()
+      .populate("courseID")
+      .exec()
+
+    const courses = await Course.find()
+    res.status(200).send(JSON.stringify({
+      data: users,
+      courses,
+      status: 200,
+    }))
+  }
+
 }
 
 module.exports = new CoursesController();

@@ -11,7 +11,6 @@ const typeCategoryRouter = require('./typeCategory');
 const announcementRouter = require('./announcement');
 const userRoute = require('./user');
 const transactionRouter = require('./transaction')
-
 function route(app) {
     app.use("/api/search", searchController)
     app.use("/api/users", userRoute)

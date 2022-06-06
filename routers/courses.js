@@ -4,6 +4,8 @@ const {AuthMiddleware} = require('../helper/JWT');
 
 const coursesController = require('../controllers/CoursesController');
 
+router.get('/getListUser', coursesController.getListUser)
+router.get('/ranking', coursesController.getRanking)
 router.post('/new', coursesController.create)
 router.get('/getAllCourses', coursesController.getAllCourses);
 // router.get('/getCourseInfomation', coursesController.getCourseInfomation);
