@@ -4,6 +4,7 @@ const router = express.Router();
 const DiscussionController = require('../controllers/DiscussionController');
 
 router.get('/', DiscussionController.getAllArticles);
+router.get('/:id', DiscussionController.getCurrentDiscussionByID);
 router.post('/', DiscussionController.addArticles);
 
 router.post('/comment', DiscussionController.addBigComment);

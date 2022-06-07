@@ -72,29 +72,12 @@ const getAllArticleOutside = async(req, res) => {
                 refinedCmt.push(currentCmt[k]);
             }
         }
-        
+        // console.log(dataArticle[i]);
         var currentData = {
             ...dataArticle[i]._doc,
-            userID : dataArticle[i].userID,
-            content: dataArticle[i].content,
-            imgUrl: dataArticle[i].imgUrl,
             comments : refinedCmt,
         }
-        
-
-        // var isFindUser = false;
-        // for(var j = 0; j < userData.length; j++){
-        //     if(dataArticle[i].userID == userData[j]._id){
-        //         isFindUser = true;
-        //         currentData.username = userData[j].username,
-        //         currentData.avatar = userData[j].avatar;
-        //         currentData.name = userData[j].name;
-        //         break;
-        //     }
-        // }
-        // if(isFindUser){
-        //     
-        // }
+        console.log(currentData)
         summaryData.push(currentData);
     }
 
@@ -110,6 +93,39 @@ class DiscussionController {
     getAllArticles = async (req, res) => {
         await getAllArticleOutside(req, res);   
     }   
+
+    getCurrentDiscussionByID = async(req, res) => {
+        console.log(req.params.id)
+        var dataArticle;
+        await Discussion.find({
+            "lessonID": req.params.id
+        }).exec()
+        .then((data) => {  
+            dataArticle = data;
+            // res.status(200).send(data);
+        })
+        .catch((error) => {
+            res.status(404).send(error);
+        })
+
+        if(dataArticle.length == 0){
+            var newArticle = new Discussion({    
+                _id: mongoose.Types.ObjectId(),
+                lessonID: req.params.id,
+                comments: [],
+                reactions: [],
+            })
+            await newArticle.save()
+                .then((data) =>{
+
+                })
+                .catch((error)=>{
+                    // console.log("error", error)
+                    return res.status(404).send({success:false});
+                })  
+        }
+        await getAllArticleOutside(req, res);
+    }
 
     addArticles = async (req, res) => {
         console.log("req.body", req.body);

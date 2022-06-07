@@ -14,6 +14,7 @@ class LessonController {
         }).populate("chapters")
         .exec()
         .then((data) => {
+            console.log(data);
             currentCourseChapter = data[0];
         })
         .catch((error) => {
