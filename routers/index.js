@@ -12,6 +12,7 @@ const announcementRouter = require('./announcement');
 const userRoute = require('./user');
 const transactionRouter = require('./transaction')
 const lessonRouter = require('./lesson');
+const discussionRouter = require('./discussion');
 function route(app) {
     app.use("/api/search", searchController)
     app.use("/api/users", userRoute)
@@ -27,6 +28,7 @@ function route(app) {
     app.use("/api/announcement", announcementRouter);
     app.use("/api/transaction", transactionRouter);
     app.use("/api/lesson",lessonRouter);
+    app.use("/api/discussion", discussionRouter)
     //app.use("/", (req, res) => res.send('hello'));
 }
 
