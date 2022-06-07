@@ -43,6 +43,33 @@ class typeCategoryController{
         })
     }  
     
+    addNewTypeCategoryID =  async(req, res) => {
+        console.log("req.body", req.body);
+
+        if(!req.body.name) {
+            res.status(404).send({
+                success:false,
+                message: "Can't get type name",
+            });
+        }
+        var newTypeCategory = new typeCategory({
+            _id: mongoose.Types.ObjectId(req.params.id),
+            name: req.body.name
+        })
+        newTypeCategory.save()
+        .then((data) =>{
+            res.status(200).send({
+                success: true,
+                data: data
+            });
+        })
+        .catch((error)=>{
+            console.log("error", error)
+            res.status(404).send({success:false});
+        })
+    }  
+
+
     editTypeCategory = async(req, res) => {
         console.log(req.body);
         // var newI = await typeCategory.findOne({_id: req.body._id});
