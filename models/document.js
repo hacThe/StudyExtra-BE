@@ -2,12 +2,13 @@ const mongoose = require ('mongoose')
 const Schema = mongoose.Schema;
 
 const DocumentSchema = new Schema ({
-    _id:{
-        documentID: String,
-    },
+    documentID: String,
     name: String,
+    author: String,
     typeID: Array,
     views: Number,
+    link: String,
+    isHidden: Boolean,
 },
     { timestamps: true }
 );

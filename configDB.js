@@ -1,8 +1,6 @@
+require("dotenv").config();
 const mongoose = require('mongoose');
-
-const USER_NAME = "dbStudyExtra";
-const PASSWORD = "5hYXc2yggqIO8H2B";
-const URI = `mongodb+srv://${USER_NAME}:${PASSWORD}@cluster0.l8ecb.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+const URI = `mongodb+srv://${process.env.DB_USER_NAME}:${process.env.DB_PASSWORD}@cluster0.l8ecb.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 
 module.exports = connectDB = async () => {
     try {
