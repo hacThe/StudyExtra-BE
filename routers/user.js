@@ -2,7 +2,7 @@ const { AuthMiddleware } = require("../helper/JWT");
 const express = require("express");
 const router = express.Router();
 
-const userController = require("../controllers/userController");
+const userController = require("../controllers/UserController");
 
 router.get("/", userController.getAllUser);
 router.get("/getCurrentUser", AuthMiddleware, userController.getCurrentUser);
