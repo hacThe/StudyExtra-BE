@@ -1,4 +1,4 @@
-const Discussion = require("../models/Discussion");
+const Discussion = require("../models/discussion");
 const User = require("../models/users");
 var mongoose = require('mongoose');
 const refineReplyComment = (replyComments, userData) => {
